@@ -256,7 +256,7 @@ Runs and releases go to `$PUREBYTE_WORK` (default `~/.purebyte/work`). No datase
 
 Created and built by **Pablo Sirvent Jiménez**:
 
-- **Websites:** [sirvent.ai](https://sirvent.ai) · [pablosirvent.com](https://pablosirvent.com)
+- **Websites:** [sirvent.ai](https://sirvent.ai) · [pablosirvent.com](https://www.pablosirvent.com)
 - **GitHub:** [@sirventai](https://github.com/sirventai)
 - **X / Twitter:** [@sirventai](https://x.com/sirventai)
 - **Blog:** [sirventai.medium.com](https://sirventai.medium.com)
