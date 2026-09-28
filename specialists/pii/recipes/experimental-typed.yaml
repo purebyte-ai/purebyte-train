@@ -1,0 +1,92 @@
+# EXPERIMENTAL -- the pii specialist with 12 TYPED span types (BIOES x 12 = 49 labels), an alternative to the released
+# label-agnostic policy (pii-1.0.0.yaml). The redacted copy then carries typed markers such as `[EMAIL_1]` and
+# `[IBAN_2]` instead of `[PII_1]`. It is kept because typed markers are useful where the type matters (logs, records,
+# code), and because everything it needs is in this folder (the generator, the rules, the typed metrics). Nothing of it
+# has been released, and it is NOT what the `pii` specialist ships. What is known: under the typed policy a perfect
+# model would still score low on the PII masking benchmark, which counts as personal data what this policy leaves
+# alone (companies, occupations, generic dates, lone places, most identifiers); and its criteria below need an exam
+# runner for typed spans that does not exist yet (README.md, "Experimental: typed spans").
+#
+# Data, 512-byte windows: 70 % from the generator (real code of the corpus with its own personal data re-planted as
+# synthetic values, records in many formats, real sentences with synthetic people, e-mails, logs; 18 % of the windows
+# with nothing to redact) and 30 % from labeled documents of public TRAIN splits (labels outside the taxonomy are
+# ignored: label -100). Model: `nano_n` (256 x 4 layers + n-gram tables 3 x 2^16 x 64), three seeds.
+#
+#   python -m pbtrain run specialists/pii/recipes/experimental-typed.yaml --device cuda
+#
+# PRE-REGISTERED CRITERION (written 2026-09-23, before any model of it was scored on the evaluation sets), machine form
+# in `criteria.exams` below; the exam metrics are defined in README.md. Model = the mean of the seeds (each seed is
+# reported too); rival = the rules (piigen/rules.py) on the SAME documents; per type, only types with >= 30 gold spans
+# in that set.
+#   pii-contexts-test, exact span-F1 (all 12 types have >= 30 gold spans): EVERY type passes --
+#     structured (EMAIL PHONE IBAN CREDIT_CARD IP DNI_NIE URL_CREDENTIALS SECRET): model >= rules - 0.02 (the rules
+#       validate checksums: the model has to match them, not beat them)
+#     contextual (PASSPORT DATE_OF_BIRTH PERSON_NAME ADDRESS): model >= rules + 0.05
+#   pii-bench-test, overlap span-F1 (10 evaluable types; IBAN and URL_CREDENTIALS have too few gold spans): at least
+#     75 % of the evaluable types pass the same margins
+#   both sets: hybrid redaction (model + rules) leak rate <= 0.7 x the rules' leak rate, over-redaction <= 2 x the rules'
+# Every item passing = the model improves on the rules. If the four contextual types fail on both sets, the model is
+# not worth its cost there. In between, it informs: six seeds before concluding anything. The PII masking benchmark
+# (piimb, label-agnostic character F2) is REPORTED, not judged: it counts as personal data what this policy does not
+# redact (companies, occupations, generic dates).
+name: pii-typed
+version: 0.1.0
+specialist: pii
+task_type: tag
+output_schema:
+  labels: [EMAIL, PHONE, IBAN, CREDIT_CARD, IP, DNI_NIE, PASSPORT, DATE_OF_BIRTH, URL_CREDENTIALS, SECRET, PERSON_NAME,
+           ADDRESS]
+  per_byte: true
+  min_select_recall: 0.60          # a collapse alarm, not a target
+  bias_policy: f1
+  per_type_bias: true              # one offset per type around the scalar bias, chosen on select (operating_bias_vec)
+data:
+  format: pii_spans
+  path: ${PUREBYTE_DATA}/corpora/code-context.bin          # data/build_code_corpus.py (20 language groups)
+  split_policy: {unit: corpus_range, seed: 0, train_frac: 0.8, select_frac: 0.1, test_frac: 0.1}
+  n_train: 80000
+  n_eval: 2000
+  seq_len: 512
+  control: shuffled_spans
+  empty_frac: 0.18                 # windows with nothing to redact
+  lists: train                     # the held-out tenth of every list is for pii-contexts-test
+  mix: {code: 0.25, data: 0.18, prose: 0.09, email: 0.07, log: 0.11, public: 0.30}
+  public_train:
+    dir: ${PUREBYTE_DATA}/pii/public_train
+train:
+  seeds: [0, 1, 2]
+  mode: causal
+  size: nano_n
+  steps: 12000
+  lr: 0.0003
+  batch: 16
+  decide: true
+criteria:
+  written: 2026-09-23
+  prediction: >-
+    pii-contexts-test: the structured types pass except SECRET (50 %: the catalogue rules are hard to match);
+    DATE_OF_BIRTH and PASSPORT pass (context is what the model reads); PERSON_NAME passes with 40 % (held-out names
+    against rules that know every list) and ADDRESS with 50 %. pii-bench-test: format drift may fail PHONE and
+    CREDIT_CARD; PERSON_NAME 50 %. Hybrid leak <= 0.7 x rules: 65 %. Every criterion passing: 25 %.
+  synthetic:
+    - {metric: control_f1, op: "<=", value: 0.10, why: "the shuffled-spans control must collapse (a positional leak otherwise)"}
+  exams:
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.EMAIL, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.PHONE, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.IBAN, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.CREDIT_CARD, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.IP, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.DNI_NIE, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.URL_CREDENTIALS, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.SECRET, op: ">=", value: -0.02}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.PASSPORT, op: ">=", value: 0.05}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.DATE_OF_BIRTH, op: ">=", value: 0.05}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.PERSON_NAME, op: ">=", value: 0.05}
+    - {exam: pii-contexts-test, metric: exact_f1_minus_rules.ADDRESS, op: ">=", value: 0.05}
+    - {exam: pii-contexts-test, metric: hybrid_leak_ratio, op: "<=", value: 0.7}
+    - {exam: pii-contexts-test, metric: hybrid_over_redaction_ratio, op: "<=", value: 2.0}
+    - {exam: pii-bench-test, metric: share_of_types_passing, op: ">=", value: 0.75,
+       why: "overlap F1, margins -0.02 structured / +0.05 contextual, types with >= 30 gold spans"}
+    - {exam: pii-bench-test, metric: hybrid_leak_ratio, op: "<=", value: 0.7}
+    - {exam: pii-bench-test, metric: hybrid_over_redaction_ratio, op: "<=", value: 2.0}
+exams: [pii-bench-test, piimb]          # fingerprinted by data/ (pii-contexts-test is generated, not downloaded)

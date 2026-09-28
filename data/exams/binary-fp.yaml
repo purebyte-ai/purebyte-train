@@ -1,0 +1,531 @@
+# False-alarm exams for the binary model: real binaries that hold no credential, so every finding on them is a false
+# alarm. Evaluation only: nothing from them may reach a training corpus (identity check on package+version, URL and
+# the sha256 of every file below; content check on 64-byte blocks).
+#
+#   python data/fetch_exams.py --set bin-fp-a            downloads the public artifacts, extracts and verifies the files
+#   python data/fetch_exams.py --set bin-fp-b --from-dir DIR   files without a public download come from a local copy
+#   python data/fingerprint_exams.py --set bin-fp-a ...
+#
+# Every file is listed with its sha256 and size. When the file comes from a public artifact, the artifact is pinned
+# (PyPI / Maven Central / NuGet / Debian-format archive / vendor download) and the file's path inside it is given;
+# `pin.verify: members` marks an artifact whose own digest is not published: the listed members are what is verified.
+# Files with no public download (`type: local`) are identified by sha256 and size only; their bytes are never
+# distributed, and their fingerprints are built from a local copy (`--from-dir`); without one, the fingerprint file of
+# the set says it is incomplete (15 files of bin-fp-b and 46 of bin-fp-c).
+# The Ubuntu packages below are zstd-compressed: extracting them needs Python 3.14+ or the `zstd` command.
+#
+# CORRECTION of 2026-09-25 (bin-fp-c). Two npm members were first pinned with the sha256 and size of the builds that
+# desktop applications bundle under the same package name and version, not with those of the files npm publishes, so
+# the download of the set stopped on them. They now pin the published files, checked on 2026-09-25 against the npm
+# tarballs (whose SHA-512 the registry publishes; the three tarballs are now pinned by sha256 too):
+#   rollup.win32-x64-msvc.node (@rollup/rollup-win32-x64-msvc 4.54.0):
+#       2,576,896 -> 2,575,872 bytes, sha256 d4c548242da1... -> e1cecdc58667...
+#   zeromq_node.napi.glibc.node (zeromq 6.0.0-beta.16, prebuilds/win32-x64/node.napi.glibc.node):
+#       927,264 -> 644,608 bytes, sha256 be15e32b21e0... -> 59e0dcada07b...
+# The bin-fp-c figures published for secrets-bin 1.0.0 (the runtime's benchmarks/RESULTS.md) were measured on the
+# earlier, application-bundled copies. None of the findings published there is in these two files, and the released
+# model reports nothing on the npm-published copies either (scanned on 2026-09-25 with every span reported).
+schema: 1
+kind: exam
+name: binary-fp
+description: Binaries without credentials, scanned to count false alarms of the binary model.
+sets:
+  - name: bin-fp-a
+    role: test
+    description: 24 compiled Python extension modules of scipy 1.18.1 and scikit-learn 1.9.1 (CPython 3.14, Linux x86-64
+      wheels from PyPI).
+    entries:
+      - id: scikit-learn-1.9.1-cp314-linux-x86-64
+        type: pypi
+        package: scikit-learn
+        filename: scikit_learn-1.9.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        url: https://files.pythonhosted.org/packages/86/4e/0bab75490ca4b85fad8388739c7ebc71d9db553f8c69e39943ee8db0aaae/scikit_learn-1.9.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        pin: {version: "1.9.1", sha256: 993d332ff80e62efae9e39603b7e872297c418d780f01a01855269a3489c950f}
+        licence: BSD-3-Clause
+        files:
+          - {member: sklearn/_loss/_loss.cpython-314-x86_64-linux-gnu.so, name: _loss.cpython-314-x86_64-linux-gnu.so, sha256: f9e7d13b1c00d702e15da632790a3feed3190bc1cb92b828f9fa458c3d179bcf, size: 1568345}
+          - {member: sklearn/metrics/_dist_metrics.cpython-314-x86_64-linux-gnu.so, name: _dist_metrics.cpython-314-x86_64-linux-gnu.so, sha256: a53617ff9aee3e3d9a0af720335dd403b923027aeb4f2cc5eaa6231c9e718b3e, size: 555320}
+          - {member: sklearn/neighbors/_ball_tree.cpython-314-x86_64-linux-gnu.so, name: _ball_tree.cpython-314-x86_64-linux-gnu.so, sha256: 54afc0c7231ea765565f5c92a556740daa6f8a0f3d5deb3c7a4cc268c00f844b, size: 557392}
+          - {member: sklearn/neighbors/_kd_tree.cpython-314-x86_64-linux-gnu.so, name: _kd_tree.cpython-314-x86_64-linux-gnu.so, sha256: 84bf597986551bb3e53d6d99cbfc12af3ac669bb45fc88d2c9c04a4b8f0dec75, size: 569064}
+          - {member: sklearn/utils/sparsefuncs_fast.cpython-314-x86_64-linux-gnu.so, name: sparsefuncs_fast.cpython-314-x86_64-linux-gnu.so, sha256: 3f39d3fe117d5a88aa0aef5789619e879f60ad3c59c6a2014f79fe9ce906a7f0, size: 655712}
+      - id: scipy-1.18.1-cp314-linux-x86-64
+        type: pypi
+        package: scipy
+        filename: scipy-1.18.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        url: https://files.pythonhosted.org/packages/6b/89/2a844506d49651e9aa1af6ef95b6bd8031cb1d5a4375edec6155037e04cf/scipy-1.18.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        pin: {version: "1.18.1", sha256: ac0333bdf38309aa3dcbe7e3fa7ea29e7a2c37c6ea306a757b700ded8e4596ad}
+        licence: BSD-3-Clause
+        files:
+          - {member: scipy/fft/_duccfft/pyduccfft.cpython-314-x86_64-linux-gnu.so, name: pyduccfft.cpython-314-x86_64-linux-gnu.so, sha256: f1b5e318dd6a25acad44904966e0f9cbf8d636a22e6a8f38cd612cf059830e25, size: 2385296}
+          - {member: scipy/io/_fast_matrix_market/_fmm_core.cpython-314-x86_64-linux-gnu.so, name: _fmm_core.cpython-314-x86_64-linux-gnu.so, sha256: 7305cac763849933e98d95a6ad9bceba9702e0f594551fcfb860a939e7a3efad, size: 4098216}
+          - {member: scipy/linalg/_decomp_interpolative.cpython-314-x86_64-linux-gnu.so, name: _decomp_interpolative.cpython-314-x86_64-linux-gnu.so, sha256: 8ec57693581a65246e297e33ca67e58abf21e78373bd6510c76c1a7e685db739, size: 744496}
+          - {member: scipy/linalg/_fblas.cpython-314-x86_64-linux-gnu.so, name: _fblas.cpython-314-x86_64-linux-gnu.so, sha256: 60f7c949c2efd719c08e55e3ddd1dc3a1561b3fa3404369b163bde53a0c21217, size: 1032705}
+          - {member: scipy/linalg/_flapack.cpython-314-x86_64-linux-gnu.so, name: _flapack.cpython-314-x86_64-linux-gnu.so, sha256: 5bc35c29eb4d9b1a6e76d992eb1fdd5ae43a74f4f06777d81bb5c316c7f588e6, size: 2572881}
+          - {member: scipy/linalg/cython_lapack.cpython-314-x86_64-linux-gnu.so, name: cython_lapack.cpython-314-x86_64-linux-gnu.so, sha256: b8c73ddf942e7b00077074016e8064478abc4195c83ef32b7ac1dbe90582c769, size: 589009}
+          - {member: scipy/odr/__odrpack.cpython-314-x86_64-linux-gnu.so, name: __odrpack.cpython-314-x86_64-linux-gnu.so, sha256: b1b0448b71b4f3aaf64a6d61553164344a5b2691a2b1feca36ffe68ab617f05f, size: 630729}
+          - {member: scipy/optimize/_highspy/_core.cpython-314-x86_64-linux-gnu.so, name: _core.cpython-314-x86_64-linux-gnu.so, sha256: c74b47e7333826cebe872c22ae4a2af6ad39eace2bd99f258dd5fd69ac6a3e4c, size: 6756048}
+          - {member: scipy/sparse/_sparsetools.cpython-314-x86_64-linux-gnu.so, name: _sparsetools.cpython-314-x86_64-linux-gnu.so, sha256: 587dfe80eb5ac91b2965ce77c38c15a83c89e814298e582e4166e9c60a9ee23a, size: 4554512}
+          - {member: scipy/spatial/_ckdtree.cpython-314-x86_64-linux-gnu.so, name: _ckdtree.cpython-314-x86_64-linux-gnu.so, sha256: e032b6e199eea74933c6bf63c147621d3103e7112179b2d0bb0cb7add820e01f, size: 782384}
+          - {member: scipy/spatial/_distance_pybind.cpython-314-x86_64-linux-gnu.so, name: _distance_pybind.cpython-314-x86_64-linux-gnu.so, sha256: fe15dc6c6382a282717337e54a59bcbded4d5b5729badfca86cac449eac6510b, size: 616576}
+          - {member: scipy/spatial/_qhull.cpython-314-x86_64-linux-gnu.so, name: _qhull.cpython-314-x86_64-linux-gnu.so, sha256: cf1c036577914c4d1ee0260b9c5d62533d75a0f33ecfd50b3b903f2a84883389, size: 936024}
+          - {member: scipy/spatial/transform/_rotation_cy.cpython-314-x86_64-linux-gnu.so, name: _rotation_cy.cpython-314-x86_64-linux-gnu.so, sha256: 4e061a3c0ec2ad22900050ef8d45e1cc2a1698d63c3f97bef57b84705dd2310f, size: 570616}
+          - {member: scipy/special/_gufuncs.cpython-314-x86_64-linux-gnu.so, name: _gufuncs.cpython-314-x86_64-linux-gnu.so, sha256: 18621e3b90e9b135cecbeae5aa32badc5ecd6be167e0c41948e03fd54afa730c, size: 975784}
+          - {member: scipy/special/_special_ufuncs.cpython-314-x86_64-linux-gnu.so, name: _special_ufuncs.cpython-314-x86_64-linux-gnu.so, sha256: 73301f284307eeb1e2fe84bb9ba676b8f7c1cd6d78288aa5f17bfeb8429d8531, size: 1659848}
+          - {member: scipy/special/_ufuncs.cpython-314-x86_64-linux-gnu.so, name: _ufuncs.cpython-314-x86_64-linux-gnu.so, sha256: cbe1d8a148dfbf5a727ff8621c5eef848a9e20e4ec69f3cb1e7493bd597a23c2, size: 1496424}
+          - {member: scipy/special/_ufuncs_cxx.cpython-314-x86_64-linux-gnu.so, name: _ufuncs_cxx.cpython-314-x86_64-linux-gnu.so, sha256: 7d8f3da332bde1a94b7e9ac19707bb63cee8cbef3f088a69f1a43f8526623b01, size: 2077392}
+          - {member: scipy/special/cython_special.cpython-314-x86_64-linux-gnu.so, name: cython_special.cpython-314-x86_64-linux-gnu.so, sha256: d9b4fbd3603755db510361ac35a3c7c77c251d7673f3a3b734accb9e27c506dc, size: 2466888}
+          - {member: scipy/stats/_unuran/unuran_wrapper.cpython-314-x86_64-linux-gnu.so, name: unuran_wrapper.cpython-314-x86_64-linux-gnu.so, sha256: 4fc07c67ca87198b0bd81a5ea1a545e63a3dad5883405bd271d3aaeb2abe91d7, size: 1339696}
+
+  - name: bin-fp-b
+    role: test
+    description: 24 Linux system libraries and executables (15 Ubuntu 26.04 packages, the PyTorch and NumPy wheels) and
+      15 Windows DLLs (system and vendor libraries). The published scans count 25 Linux files because they also read
+      /usr/bin/perl, a hard link to perl5.40.1 below (the same bytes, the same sha256).
+    entries:
+      - id: ubuntu-git
+        type: deb
+        package: git
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/git_2.53.0-1ubuntu1_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/g/git/git_2.53.0-1ubuntu1_amd64.deb]
+        pin: {version: "1:2.53.0-1ubuntu1", sha256: c3b36d7357dea773eefe6c4f97ebff416e5afee22489dc1f729e31d6f47872e9}
+        licence: GPL-2.0-only
+        files:
+          - {member: usr/bin/git, name: git, sha256: 5516c9f362c29376ab9a499a33082f9f611941d8c75930c880e30ad109e39c9a, size: 4547768}
+      - id: ubuntu-libaom3
+        type: deb
+        package: libaom3
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libaom3_3.13.1-2ubuntu0.1_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/a/aom/libaom3_3.13.1-2ubuntu0.1_amd64.deb]
+        pin: {version: "3.13.1-2ubuntu0.1", sha256: 74d46764b6b336d15682fb7d6203e6e1052be4ffb1ec371237989bab59fa829d}
+        licence: BSD-2-Clause
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libaom.so.3.13.1, name: libaom.so.3.13.1, sha256: 92d8b38ea0b9d0c545ce1653e371bc21f11e804dac3727f095785cccab05b9eb, size: 5529928}
+      - id: ubuntu-libapt-pkg7.0
+        type: deb
+        package: libapt-pkg7.0
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libapt-pkg7.0_3.2.0_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/a/apt/libapt-pkg7.0_3.2.0_amd64.deb]
+        pin: {version: "3.2.0", sha256: b9bfedd23dd14572934122d88266ae0ee398f952d1a0268c47e9ba2b4d54d3e0}
+        licence: GPL-2.0-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libapt-pkg.so.7.0.0, name: libapt-pkg.so.7.0.0, sha256: 4196cbd0df57b5147205d3cd37cc7b0cb73b4f78f57aaf6c7617c1c6ad66a062, size: 2359768}
+      - id: ubuntu-libc6
+        type: deb
+        package: libc6
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libc6_2.43-2ubuntu2.4_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/g/glibc/libc6_2.43-2ubuntu2.4_amd64.deb]
+        pin: {version: "2.43-2ubuntu2.4", sha256: a613b457f3ff9c84ebd28af8a05afdec22605ad9aed87c71e3a6ae5170aeb9ca}
+        licence: LGPL-2.1-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libc.so.6, name: libc.so.6, sha256: 85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7, size: 2190608}
+      - id: ubuntu-libglycin-2-0
+        type: deb
+        package: libglycin-2-0
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libglycin-2-0_2.1.1+ds-0ubuntu1_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/g/glycin/libglycin-2-0_2.1.1+ds-0ubuntu1_amd64.deb]
+        pin: {version: "2.1.1+ds-0ubuntu1", sha256: 99b6836d1068436e7f92cc3a7b2c2c0efddeea12dc50c16a727f45bc044d4393}
+        licence: MPL-2.0 OR LGPL-2.1-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libglycin-2.so.0, name: libglycin-2.so.0, sha256: 5916cfcc0101ddf1863f6a5cc4c224662ea0614dc756d57ca860ef445b1dcfc2, size: 4142392}
+      - id: ubuntu-libgprofng0
+        type: deb
+        package: libgprofng0
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libgprofng0_2.46-3ubuntu2_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/b/binutils/libgprofng0_2.46-3ubuntu2_amd64.deb]
+        pin: {version: "2.46-3ubuntu2", sha256: 6b066ab912300b2c6a965a9a8045da45c237a52b76c2c11d8f2ceaf7aabfacbb}
+        licence: GPL-3.0-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libgprofng.so.0.0.0, name: libgprofng.so.0.0.0, sha256: 9cee736c1d7ceeee70fad99b61f1b9d9cdd3d12f72d103bc35fb345df9bc7dc1, size: 2510472}
+      - id: ubuntu-libhwy1t64
+        type: deb
+        package: libhwy1t64
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libhwy1t64_1.3.0-2_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/h/highway/libhwy1t64_1.3.0-2_amd64.deb]
+        pin: {version: "1.3.0-2", sha256: 8b4e74f6fc7c9a08956f1430fe5d80f4d8970a08fe24df9e187d57753f652c7a}
+        licence: Apache-2.0 OR BSD-3-Clause
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libhwy_contrib.so.1.3.0, name: libhwy_contrib.so.1.3.0, sha256: e263367128a8526928b234d287634565e316ea52b74fcaf3565314389dfb71f6, size: 5814728}
+      - id: ubuntu-libjxl0.11
+        type: deb
+        package: libjxl0.11
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libjxl0.11_0.11.1-6ubuntu4.2_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/j/jpeg-xl/libjxl0.11_0.11.1-6ubuntu4.2_amd64.deb]
+        pin: {version: "0.11.1-6ubuntu4.2", sha256: ad047c32784c7e3d1119f32c164876ae8f60c545c25354c9d673a958eef183df}
+        licence: BSD-3-Clause
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libjxl.so.0.11.1, name: libjxl.so.0.11.1, sha256: f6d96ce21d5d4b1ccac292ed3b5f92ce8fa77703d626edfc81ec1243c486b495, size: 4049120}
+      - id: ubuntu-libperl5.40
+        type: deb
+        package: libperl5.40
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libperl5.40_5.40.1-7ubuntu0.3_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/p/perl/libperl5.40_5.40.1-7ubuntu0.3_amd64.deb]
+        pin: {version: "5.40.1-7ubuntu0.3", sha256: cf480ce25c4dc859e48619df013f820f7259f02f93397cf9975de548fd356bce}
+        licence: GPL-1.0-or-later OR Artistic-1.0-Perl
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libperl.so.5.40.1, name: libperl.so.5.40.1, sha256: aca850aeb21dcb7ec4dfca9c93bd0ed6771735f097b68d816aaf0ac57438005c, size: 3910808}
+          - {member: usr/lib/x86_64-linux-gnu/perl/5.40.1/auto/Encode/JP/JP.so, name: JP.so, sha256: a063308bf78aa101af747c9b798ef32794113aba82c17bc7273b2a44bd3fa9d5, size: 2750944}
+          - {member: usr/lib/x86_64-linux-gnu/perl/5.40.1/auto/Encode/KR/KR.so, name: KR.so, sha256: b72ce8dab3ffcad7ded4d3785cbaf8f4e309e8de6e6ec99d83f7a04ebc1cdb8c, size: 2415072}
+      - id: ubuntu-librsvg2-2
+        type: deb
+        package: librsvg2-2
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/librsvg2-2_2.61.3+dfsg-3_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/libr/librsvg/librsvg2-2_2.61.3+dfsg-3_amd64.deb]
+        pin: {version: "2.61.3+dfsg-3", sha256: af1d01163b01f45a027054c3e0bcdadf01d5d318b8b9ffdcaa13c01ec4e2f2e7}
+        licence: LGPL-2.1-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/librsvg-2.so.2.61.3, name: librsvg-2.so.2.61.3, sha256: 43d7abf093855066e028f6550e376ccc37857c4df807b1b9fed702493d412a0f, size: 5780264}
+      - id: ubuntu-libstdc++6
+        type: deb
+        package: libstdc++6
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libstdc++6_16-20260322-1ubuntu1_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/g/gcc-16/libstdc++6_16-20260322-1ubuntu1_amd64.deb]
+        pin: {version: "16-20260322-1ubuntu1", sha256: a32b9ad585e39bdc7bd15d1eae6293461e6d466859a1dd2f7862d1e40f89b9d8}
+        licence: GPL-3.0-or-later WITH GCC-exception-3.1
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.35, name: libstdc++.so.6.0.35, sha256: 5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3, size: 2735712}
+      - id: ubuntu-libsystemd-shared
+        type: deb
+        package: libsystemd-shared
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/libsystemd-shared_259.5-0ubuntu3.4_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/s/systemd/libsystemd-shared_259.5-0ubuntu3.4_amd64.deb]
+        pin: {version: "259.5-0ubuntu3.4", sha256: 9b30b1e96cc8b48f94a2df5c1cbee7690e16f727d71b40c458a64aabe15db35f}
+        licence: LGPL-2.1-or-later
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/systemd/libsystemd-core-259.so, name: libsystemd-core-259.so, sha256: 8fcb08373177707996567006be35737e408d9ede3b0a2ca08fdd130182012754, size: 2488904}
+          - {member: usr/lib/x86_64-linux-gnu/systemd/libsystemd-shared-259.so, name: libsystemd-shared-259.so, sha256: c733810400659bf34b5d46f77b801507a384ebc36392c5fe48fedc72388bae3e, size: 5001176}
+      - id: ubuntu-mesa-vulkan-drivers
+        type: deb
+        package: mesa-vulkan-drivers
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/mesa-vulkan-drivers_26.0.3-1ubuntu1_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/m/mesa/mesa-vulkan-drivers_26.0.3-1ubuntu1_amd64.deb]
+        pin: {version: "26.0.3-1ubuntu1", sha256: 6936020d25aeb53769b36b60be69f5323dd2ed9f8288a743ab970ab052a74cc6}
+        licence: MIT
+        files:
+          - {member: usr/lib/x86_64-linux-gnu/libvulkan_gfxstream.so, name: libvulkan_gfxstream.so, sha256: 8db10a04308b81ddbff866a2d8782d3ea7e9da6f6aa992dddbafcb24d36899b9, size: 2308760}
+      - id: ubuntu-perl-base
+        type: deb
+        package: perl-base
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/perl-base_5.40.1-7ubuntu0.3_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/p/perl/perl-base_5.40.1-7ubuntu0.3_amd64.deb]
+        pin: {version: "5.40.1-7ubuntu0.3", sha256: eae28e944eccca8ab1a5387dfec710ed32f66531880a6c2a3285ffd95d3b59f2}
+        licence: GPL-1.0-or-later OR Artistic-1.0-Perl
+        files:
+          - {member: usr/bin/perl5.40.1, name: perl5.40.1, sha256: b8946c83070e6aa031495d36a17324d7ae3f29eee658a5ab4cc4fbd47c45520a, size: 4064448}
+      - id: ubuntu-vim
+        type: deb
+        package: vim
+        arch: amd64
+        distro: ubuntu
+        url: https://launchpad.net/ubuntu/+archive/primary/+files/vim_9.1.2141-1ubuntu4.9_amd64.deb
+        mirrors: [https://mirrors.edge.kernel.org/ubuntu/pool/main/v/vim/vim_9.1.2141-1ubuntu4.9_amd64.deb]
+        pin: {version: "2:9.1.2141-1ubuntu4.9", sha256: ad3bb9ab0716948f9b013bae0f438acd08c40a7fd4a7d0940e599c0328f4926a}
+        licence: Vim
+        files:
+          - {member: usr/bin/vim.basic, name: vim.basic, sha256: 2370a103e4886c7c35ea7860cdfa0625483d96fb65a6cb52353604be3ffe9c69, size: 4571880}
+      - id: numpy-2.5.3-cp314-linux-x86-64
+        type: pypi
+        package: numpy
+        filename: numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        url: https://files.pythonhosted.org/packages/45/8f/9beacf79ca7c650688ad0baa80931adb988fe6e6e5d5903c23cc3dbd70eb/numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        pin: {version: "2.5.3", sha256: b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b}
+        licence: BSD-3-Clause
+        files:
+          - {member: numpy.libs/libgfortran-83c28eba-468e71e5.so.5.0.0, name: libgfortran-83c28eba-468e71e5.so.5.0.0, sha256: a6a368328d02a5d8a149746f13f6268f8cc9192df5c18777b25c3c9b5ef52160, size: 2862249}
+      - id: torch-2.14.0-cpu-cp314-linux-x86-64
+        type: url
+        url: https://download.pytorch.org/whl/cpu/torch-2.14.0%2Bcpu-cp314-cp314-manylinux_2_28_x86_64.whl
+        format: zip
+        pin: {verify: members}          # the wheel's digest is not published with it
+        package: {ecosystem: pypi, name: torch, version: 2.14.0+cpu}
+        licence: BSD-3-Clause
+        files:
+          - {member: torch/bin/protoc, name: protoc, sha256: 866a9e66a42b2764b5f9d60bcb5e9fbd370a9bbc9fc0a1621cd54d245ce6e703, size: 5463672}
+          - {member: torch/bin/protoc-3.21.12.0, name: protoc-3.21.12.0, sha256: 866a9e66a42b2764b5f9d60bcb5e9fbd370a9bbc9fc0a1621cd54d245ce6e703, size: 5463672}
+          - {member: torch/bin/test_lazy, name: test_lazy, sha256: 1e4b8d47f0d319dba52588062f75e5db78ad4e9e78f01fb3c9db7585b2c4c1c4, size: 4960104}
+          - {member: torch/test/c10_intrusive_ptr_test, name: c10_intrusive_ptr_test, sha256: cef6904643f6672f5a0af9cf46f87d90b2a818605401c3bdb405c611d1bb7edb, size: 2272256}
+          - {member: torch/test/op_registration_test, name: op_registration_test, sha256: a2733144512c94be96ef14ee7248a16fa2285cca96aa09c8fcbcca71b73ece2c, size: 4869336}
+      - id: windows-dlls
+        type: local
+        licence: LicenseRef-Proprietary
+        provenance: Windows system DLLs and vendor redistributables (DirectX, MFC, graphics driver); not redistributable
+        files:
+          - {name: AuthFWSnapin.dll, sha256: 5d90dab38b70f7aad01935597856f8105d44239f83e2f53c613c70316e2abf6e, size: 5108736}
+          - {name: D3DX9_40.dll, sha256: 8a9ea8bc06786d342af4e7d171abbe6640cf31d9d01afb86dbf63f26302077db, size: 5631312}
+          - {name: D3DX9_41.dll, sha256: 33fd649d5b6e90bd7b7f51d1431ef3501772ae985e320442e5fd750e4368669a, size: 5425496}
+          - {name: Windows.AI.MachineLearning.dll, sha256: 8b003352d78268a56773b5ae0ec487501fbfcb4f6bfd241c63ed7cb1c670a739, size: 5729280}
+          - {name: Windows.StateRepository.dll, sha256: c6d4a23c0ff993bd1d388f5038443d60eeb5d8a6af985793e40de23b02194567, size: 5865480}
+          - {name: amdadlx64.dll, sha256: 0af70c14b533491f7ffde29c9931abd58d7fcd4a0b32ec5572f52114836264b4, size: 5221904}
+          - {name: d3dcsx_42.dll, sha256: 8852c218583dc11113705bd89dabd51b0f77db6b393eaf9a9a751652b7cdef24, size: 5554512}
+          - {name: mfc100.dll, sha256: ef2e0df287af95855b6b13173259df847a2cb8a1872ba3d4573e82abd4fb9699, size: 5574984}
+          - {name: mfc100u.dll, sha256: 4c33d4179fff5d7aa7e046e878cd80c0146b0b134ae0092ce7547607abc76a49, size: 5601616}
+          - {name: mfc120.dll, sha256: fb83e940b281947cc8659611ef6afa75c21a6626b1e70565d0a573f22a48b55e, size: 5608096}
+          - {name: mfc120u.dll, sha256: d822ec4e09fdf5446e62c09cf5819146f09a4670f77aaa81e4133b912592f1f9, size: 5634720}
+          - {name: mfc140.dll, sha256: b784303d86232a1b316c79839aa78bf631b4fc182e55d9d947688adb066dff26, size: 5563320}
+          - {name: mfc140u.dll, sha256: fc5848eb58982e193cdfe73f1f26cd04fce4e196f717f42b89ae27315cd52f6f, size: 5597112}
+          - {name: prm0009.dll, sha256: 8661b4e72de38df01673dca81ea1daa3988fa9d4d5c5fec33b162673c8ac44a2, size: 5739008}
+          - {name: spwizimg.dll, sha256: b206630e0c06b9bea1809d80b9f2601ee417857e7c8a22c1854e30c08ea744e1, size: 5865488}
+
+  - name: bin-fp-c
+    role: test
+    description: 69 files in formats absent from the training corpus of the first binary models (JAR/CLASS, PYC,
+      WebAssembly, APK, firmware blobs, Mach-O, ELF for ARM32/ARM64/AVR, relocatable objects, ar archives, PE for ARM64,
+      Windows executables, Node.js addons).
+    entries:
+      - id: maven-bcprov-jdk15on
+        type: url
+        url: https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk15on/1.70/bcprov-jdk15on-1.70.jar
+        format: raw
+        pin: {sha256: 8f3c20e3e2d565d26f33e8d4857a37d0d7f8ac39b62a7026496fcab1bdac30d4, size: 5867298}
+        package: {ecosystem: maven, name: "org.bouncycastle:bcprov-jdk15on", version: "1.70"}
+        licence: MIT
+        files:
+          - {name: bcprov-jdk15on-1.70.jar, sha256: 8f3c20e3e2d565d26f33e8d4857a37d0d7f8ac39b62a7026496fcab1bdac30d4, size: 5867298}
+      - id: maven-guava
+        type: url
+        url: https://repo1.maven.org/maven2/com/google/guava/guava/33.4.8-jre/guava-33.4.8-jre.jar
+        format: raw
+        pin: {sha256: f3d7f57f67fd622f4d468dfdd692b3a5e3909246c28017ac3263405f0fe617ed, size: 3023797}
+        package: {ecosystem: maven, name: "com.google.guava:guava", version: "33.4.8-jre"}
+        licence: Apache-2.0
+        files:
+          - {name: guava-33.4.8-jre.jar, sha256: f3d7f57f67fd622f4d468dfdd692b3a5e3909246c28017ac3263405f0fe617ed, size: 3023797}
+      - id: maven-liquibase-core
+        type: url
+        url: https://repo1.maven.org/maven2/org/liquibase/liquibase-core/4.29.1/liquibase-core-4.29.1.jar
+        format: raw
+        pin: {sha256: d32b687d37f5fbf9f30d10e12cb9d7ba4ae3e41f7248ef2df3de2ce53b0cdd27, size: 2877872}
+        package: {ecosystem: maven, name: "org.liquibase:liquibase-core", version: "4.29.1"}
+        licence: Apache-2.0
+        files:
+          - {name: liquibase-core-4.29.1.jar, sha256: d32b687d37f5fbf9f30d10e12cb9d7ba4ae3e41f7248ef2df3de2ce53b0cdd27, size: 2877872}
+      - id: maven-org.eclipse.jgit
+        type: url
+        url: https://repo1.maven.org/maven2/org/eclipse/jgit/org.eclipse.jgit/6.8.0.202311291450-r/org.eclipse.jgit-6.8.0.202311291450-r.jar
+        format: raw
+        pin: {sha256: b0ca6129b0614f5f90e9456c51bcfe141483248aec6a2cc2a7816f638bb04abf, size: 3171271}
+        package: {ecosystem: maven, name: "org.eclipse.jgit:org.eclipse.jgit", version: "6.8.0.202311291450-r"}
+        licence: BSD-3-Clause
+        files:
+          - {name: org.eclipse.jgit-6.8.0.jar, sha256: b0ca6129b0614f5f90e9456c51bcfe141483248aec6a2cc2a7816f638bb04abf, size: 3171271}
+      - id: maven-scala-library
+        type: url
+        url: https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.6/scala-library-2.13.6.jar
+        format: raw
+        pin: {sha256: f19ed732e150d3537794fd3fe42ee18470a3f707efd499ecd05a99e727ff6c8a, size: 5955737}
+        package: {ecosystem: maven, name: "org.scala-lang:scala-library", version: "2.13.6"}
+        licence: Apache-2.0
+        files:
+          - {name: scala-library-2.13.6.jar, sha256: f19ed732e150d3537794fd3fe42ee18470a3f707efd499ecd05a99e727ff6c8a, size: 5955737}
+      - id: maven-tomcat-embed-core
+        type: url
+        url: https://repo1.maven.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/9.0.56/tomcat-embed-core-9.0.56.jar
+        format: raw
+        pin: {sha256: 17d020617f6be1b792ff4a7516ae71b0928ea73e0d9845f13c244d95d015f5fa, size: 3435648}
+        package: {ecosystem: maven, name: "org.apache.tomcat.embed:tomcat-embed-core", version: "9.0.56"}
+        licence: Apache-2.0
+        files:
+          - {name: tomcat-embed-core-9.0.56.jar, sha256: 17d020617f6be1b792ff4a7516ae71b0928ea73e0d9845f13c244d95d015f5fa, size: 3435648}
+      - id: nuget-imgui.net
+        type: url
+        url: https://api.nuget.org/v3-flatcontainer/imgui.net/1.91.6.1/imgui.net.1.91.6.1.nupkg
+        pin: {sha256: 57d4056932835b9a9cb517bfbe8579bcc5106551347f63ad7123cdef470b2a82, size: 4402114}
+        package: {ecosystem: nuget, name: ImGui.NET, version: 1.91.6.1}
+        licence: MIT
+        files:
+          - {member: runtimes/osx/native/libcimgui.dylib, name: libcimgui.dylib, sha256: cf5e46116b0304d0387c91f2701817983b29001eee008e333baa4cf1e104e0a1, size: 3155312}
+          - {member: runtimes/win-arm64/native/cimgui.dll, name: cimgui_win-arm64.dll, sha256: 0237a799b5b3a5a76995bd247870b412367c669d676b0d66b4aa40db1431144e, size: 1318912}
+      - id: arduino-avr-gcc
+        type: url
+        url: https://downloads.arduino.cc/tools/avr-gcc-7.3.0-atmel3.6.1-arduino7-i686-w64-mingw32.zip
+        pin: {sha256: a54f64755fff4cb792a1495e5defdd789902a2a3503982e81b898299cf39800e, size: 52519412}
+        package: {ecosystem: arduino-tools, name: avr-gcc-i686-w64-mingw32, version: 7.3.0-atmel3.6.1-arduino7}
+        licence: GPL-3.0-or-later AND BSD-3-Clause
+        files:
+          - {member: avr/avr/lib/avrxmega5/crtatxmega64a1u.o, name: avr_crtatxmega64a1u.o, sha256: 31e644846244c188957d7f6e0e3040027ce44a5cc6cc9cc040659553c38bf029, size: 59156}
+          - {member: avr/avr/lib/avrxmega7/crtatxmega128a1u.o, name: avr_crtatxmega128a1u.o, sha256: 63e82779491820d163b395998146032d32263993006761ba37d91c914b49e81c, size: 59172}
+      - id: numpy-2.5.3-cp314-linux-x86-64
+        type: pypi
+        package: numpy
+        filename: numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        url: https://files.pythonhosted.org/packages/45/8f/9beacf79ca7c650688ad0baa80931adb988fe6e6e5d5903c23cc3dbd70eb/numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        pin: {version: "2.5.3", sha256: b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b}
+        licence: BSD-3-Clause
+        files:
+          - {member: numpy/_core/lib/libnpymath.a, name: numpy_libnpymath.a, sha256: 19cdbda951b9053171d4e59488b52ffe65edd640d7dfd94076651ca447aad6cf, size: 53152}
+      - id: android-ndk-r27
+        type: url
+        url: https://dl.google.com/android/repository/android-ndk-r27-windows.zip
+        pin: {verify: members}          # the archive's SHA-256 is not published (only SHA-1); ~0.7 GB
+        package: {ecosystem: android-sdk, name: ndk, version: 27.0.12077973}
+        licence: LicenseRef-Android-SDK-License
+        files:
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/lib/linux/libclang_rt.asan-aarch64-android.so, name: libclang_rt.asan-aarch64-android.so, sha256: fa93f0e8aa3c5d032e3421a2f88df6b04d5112547df9044e9bdb8cdbc96bc7b2, size: 2670368}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/lib/linux/libclang_rt.asan-arm-android.so, name: libclang_rt.asan-arm-android.so, sha256: 3e87927bfc0da656cce7ab47904443c5828c0f146d15af3b93ce012711ca0831, size: 2386492}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/lib/linux/libclang_rt.tsan-aarch64-android.so, name: libclang_rt.tsan-aarch64-android.so, sha256: 71f90752bba6cb4adce844cf5c2a1392b18bb21b892b9bbcb8d1d547bc3accae, size: 3072768}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/lib/linux/libclang_rt.ubsan_standalone-arm-android.so, name: libclang_rt.ubsan_standalone-arm-android.so, sha256: ef633dfe2450524260bf273a1664a9c1503931b4e135eb440a23c26f6fcb319b, size: 793080}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/aarch64-linux-android/21/libc.so, name: ndk_aarch64_libc.so, sha256: ff4cfb5da651cee071851fc2faa5b87d73316d316d45829a84d2ef77d4e201bf, size: 180848}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/libc.so, name: ndk_armeabi_libc.so, sha256: 19bbbcd469f76a4b2ff94fb2d03d86049a13784af5d32cc03816f5b547c240c7, size: 122772}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_static.a, name: ndk_aarch64_libc++_static.a, sha256: 4016f756d1a16ea1cfdd0895c4d97106468f498e96723debfad8f4621f60a206, size: 2514694}
+          - {member: android-ndk-r27/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc.a, name: ndk_armeabi_libc.a, sha256: 0061cbe028e5e1d4102f22500cc390667387af85d31c84dded4fc8e960fd5628, size: 4691842}
+          - {member: android-ndk-r27/simpleperf/bin/android/arm64/simpleperf, name: simpleperf_arm64, sha256: e814416ac315681bec1c28d73f0ddb2dd486ff49a1ad6cb28e49f387139bc18f, size: 4192304}
+      - id: npm-rollup-win32-x64-msvc
+        type: url
+        url: https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.54.0.tgz
+        format: tar
+        pin: {sha256: fc5183698a372e9a4200c2658e2756dc928ea9d9b05a4c7c540b52450ab2c589, size: 978319}
+        package: {ecosystem: npm, name: "@rollup/rollup-win32-x64-msvc", version: "4.54.0"}
+        licence: MIT
+        notes: the tarball matches the SHA-512 the npm registry publishes (checked 2026-09-25); member corrected on
+          2026-09-25 (see the header)
+        files:
+          - {member: package/rollup.win32-x64-msvc.node, name: rollup.win32-x64-msvc.node, sha256: e1cecdc5866708c4b9fdfba8f381ea1698d468d9310569c3008ad48e70bfbba3, size: 2575872}
+      - id: npm-zeromq
+        type: url
+        url: https://registry.npmjs.org/zeromq/-/zeromq-6.0.0-beta.16.tgz
+        format: tar
+        pin: {sha256: 563de0cd82f1f32d0f8a2d8abb10609114a6fd445f5f62adb4e8f654c1861b22, size: 2310528}
+        package: {ecosystem: npm, name: "zeromq", version: "6.0.0-beta.16"}
+        licence: MIT
+        notes: the tarball matches the SHA-512 the npm registry publishes (checked 2026-09-25); member corrected on
+          2026-09-25 (see the header)
+        files:
+          - {member: package/prebuilds/win32-x64/node.napi.glibc.node, name: zeromq_node.napi.glibc.node, sha256: 59e0dcada07b74e7066ce78c9197d8666f2459f86eb822c1eb89d08a90ee9c97, size: 644608}
+      - id: npm-astrojs-compiler
+        type: url
+        url: https://registry.npmjs.org/@astrojs/compiler/-/compiler-2.13.1.tgz
+        format: tar
+        pin: {sha256: d1e78d31e57823b4cf0d23a809778289a7c5c39c84f62dc4dfec5868a2796e08, size: 1437249}
+        package: {ecosystem: npm, name: "@astrojs/compiler", version: "2.13.1"}
+        licence: MIT
+        notes: the tarball matches the SHA-512 the npm registry publishes (checked 2026-09-25)
+        files:
+          - {member: package/dist/astro.wasm, name: astro.wasm, sha256: 66f1affc6b574f14235119c959ffbdea474fa3ab9432fe810bf8bfca338ce139, size: 5139085}
+      - id: android-emulator-skins
+        type: local
+        licence: LicenseRef-Android-SDK-License
+        provenance: Android emulator skin overlay packages
+        files:
+          - {name: EmulationPixel10Overlay.apk, sha256: e064dfe79d70973446a05818f46706863b6514143f00bf66ea7dfce691a0f5ea, size: 16797}
+          - {name: EmulationPixel10ProFoldOverlay.apk, sha256: b1cdbe7b45a6ac8400bce2c5a1e233481be10564cb500444bf68cbba865c76e0, size: 20893}
+          - {name: SystemUIEmulationPixel10ProXLOverlay.apk, sha256: 501073488c04c22ad5dabec08b22bc4a936db7cde407d2efadc1d8bee321dda6, size: 16962}
+      - id: zig-cache-objects
+        type: local
+        licence: MIT
+        provenance: objects and archives from a local Zig compiler cache
+        files:
+          - {name: zig_cxa_demangle.o, sha256: 0a13b50831a719c4c2317232d9a24713e12a2178c565d796641da2fe2b758321, size: 1430888}
+          - {name: zig_libcxx_algorithm.o, sha256: 41bc735efb334ce2de6580be96ccfe5fbf9f27c04ed7df3e968805b30572e28c, size: 1282344}
+          - {name: zig_libcxx_locale.o, sha256: fc6fb4c63a7d4aebc726116a88ce4e47d6e37fd4f7aab51e4220d6bc5ad3a37a, size: 4128232}
+          - {name: zig_libunwind.o, sha256: e5db89845852917da371c850979d98cba6111d133cd86f51ad225056e0d38ef8, size: 227992}
+          - {name: zig_pb_zig.o, sha256: 447cefb1a1362c494beeea4c1feb25507e8c67d905d5a80c7e8608c85e0a4b71, size: 2228328}
+      - id: zig-cache-archive
+        type: local
+        licence: MIT
+        provenance: an archive from a local Zig compiler cache
+        files:
+          - {name: zig_libunwind.a, sha256: ed5aff1fa97e96d9ea8065dba10543825926bee72331f67c2cc52873e64f96b5, size: 299122}
+      - id: jna-classes
+        type: local
+        licence: Apache-2.0 OR LGPL-2.1-or-later
+        provenance: JNA 5.14.0 classes from an Eclipse Orbit bundle
+        files:
+          - {name: jna_Native.class, sha256: 527878811901063e116e0e9ac5ae41c4fccd73405931a821ec913f9c2cb4f922, size: 49952}
+          - {name: jna_NativeLibrary.class, sha256: 7ef332f2261dc71cc9c50ab9778ed7855dac27c24e2dffcf20257d6f7f38aa2f, size: 25718}
+          - {name: jna_Pointer.class, sha256: e1a71aec0ea46661397c18b2d18cf8fa9bd7223b2ac9d0d05bfb767296fc2528, size: 22558}
+          - {name: jna_Structure.class, sha256: 72aa28ac9ddf233e1fd87b1d815c8a65bf7b69bc2346299277a4787e4a1625e3, size: 39415}
+      - id: windows-executables
+        type: local
+        licence: LicenseRef-Proprietary
+        provenance: Windows system executables; not redistributable
+        files:
+          - {name: Taskmgr.exe, sha256: 26f020dc1369c432249efc5c09f728b59222d8553a768b9919afc3672491c04b, size: 1356296}
+          - {name: WinSAT.exe, sha256: 09641422179f119438a963579956ee836188181a199436fcf0896592ba68ae3e, size: 2811392}
+          - {name: certutil.exe, sha256: fd1670b43e2d9188b12b233780bf043c5a90a67a2c6e3fcdc564a5c246531bc2, size: 1679872}
+          - {name: conhost.exe, sha256: b02ee54fb2ec69673386d41119ee8ed083a6eab3bfca6aa2155d20ce68ef8963, size: 867840}
+          - {name: curl.exe, sha256: 3345339164cf384eff527b6c3160fea8d849a4231ec6ca80513e3a739e505168, size: 711736}
+          - {name: mmc.exe, sha256: 58f32d71bb1c3e388cd96bfa05e366fd95b9c476605c09a4aa3be4e2eed2a3d8, size: 1955328}
+          - {name: mspaint.exe, sha256: 94f22ae686874a5f016aacf7f74f679decc8d52a39dfdf31dcd5133739bba532, size: 938496}
+          - {name: mstsc.exe, sha256: 92f8a6693a10149e061718cbcb52f7944dcbbf50cfd15ed0ecd9cc9f10ace77d, size: 1288704}
+          - {name: vulkaninfo.exe, sha256: b902676fbc1ba092d43a21bfacd5eb8c3bcaa844a5ebed5940032c37a3aef808, size: 2413560}
+      - id: virtualenv-launchers
+        type: local
+        licence: PSF-2.0
+        provenance: launchers written by a Python virtual environment
+        files:
+          - {name: venv_hipInfo.exe, sha256: 7635ee0456bf88a78fdd24034684ce5243a309a053607ab61556a6304d26033f, size: 108388}
+          - {name: venv_pip.exe, sha256: 7214d1ab41686b3edd84daa89167845a3130b68dec3adef21a78dd6082cc0886, size: 108440}
+          - {name: venv_python.exe, sha256: 41123879d2e991377997acadf5f0cf8f34fa10d86362eded8c69b6041e2893b5, size: 270104}
+      - id: driver-firmware
+        type: local
+        licence: LicenseRef-Proprietary
+        provenance: Wi-Fi firmware from Windows driver packages
+        files:
+          - {name: fw_bcm_43241b4rtecdc.bin, sha256: ab46ba7adb897ae30709fe1af4f1cceaab119ae373167b6a3ec5bb11407f97e2, size: 420139}
+          - {name: fw_bcm_4356a2rtecdc.bin, sha256: d1d4d68c5b0e9004d778fb33d70b844a95920a5cdfb21463462fbd51a3a11632, size: 651235}
+          - {name: fw_mt7662.bin, sha256: 24b20cf1357e9f86af4582f713c3ecadb73b43a019e4c9efd5d02833081fb083, size: 79216}
+          - {name: fw_qca61x4_2_2.bin, sha256: f725bf4294caa1f221896d7eb6385f006993343e75db9ec793fb30e64902cd9f, size: 1089520}
+          - {name: fw_qca9377_2_0.bin, sha256: 07a8ecc5059b780470bf227790a3a3c01913c314a3ae6874c6df1f226f99df02, size: 1135984}
+      - id: macho-objects
+        type: local
+        licence: MIT
+        provenance: objects of a Node.js native addon build (macOS x86-64)
+        files:
+          - {name: macho_darwin_list.o, sha256: 327a70266010a85a1c81002550f465f99a0d900a811b7b64bcf9a75808afa94c, size: 327680}
+          - {name: macho_serialport.o, sha256: bf0e88174d8491cfd2e71ee5136fb2020981c8f250fdc070007cdf8c2d2c77de, size: 434340}
+      - id: node-addons
+        type: local
+        licence: MIT
+        provenance: Node.js native addons built into desktop applications
+        files:
+          - {name: better_sqlite3.node, sha256: 3e68c6c94dcd558fd6dd4fa57c44afe2e1439180288825e1189f28cd5694456b, size: 1895424}
+          - {name: mongocrypt.node, sha256: ef3aa83db108758d5fff369dff35bb5c392f25049a9cc78fc870072b77c5e306, size: 2149896}
+          - {name: node_sqlite3.node, sha256: b4a58d952e26847dd0ad582b03f37367d4bed18aed22a5ca9320380fe457aaf5, size: 1907816}
+          - {name: vscode-sqlite3.node, sha256: ec7954b3af4f64e51cae2abcc7665dc0f67be462338dc81f81d0d19b539e53b8, size: 1840480}
+      - id: python-bytecode
+        type: local
+        licence: LicenseRef-Various
+        provenance: bytecode compiled locally by CPython 3.12 and 3.14
+        files:
+          - {name: numpy_test_multiarray.cpython-314.pyc, sha256: b093cedc1a8d96b2df8bc83cf3fc8b1da8352c03c0bfd3c9bca104548b75bfe5, size: 761981}
+          - {name: pydoc_topics.cpython-314.pyc, sha256: 8b30770108b061cbff538aa5a6d6dd45406b58c1c4f0b3ea0354bb1e0a64221d, size: 581987}
+          - {name: scipy__continuous_distns.cpython-314.pyc, sha256: 7700c4f7078e7089fe6391d808e4ea7bdc3bf2f79f41acc80e3e49b0395e38dc, size: 617912}
+          - {name: scipy_test_stats.cpython-312.pyc, sha256: be22202c3728efcc57f7988955d9db148208ea75900b81e2cbf8dbf6070b62bf, size: 640834}
+          - {name: sympy_bench_solvers.cpython-314.pyc, sha256: bc13269e92a162ffe8fe98810c5d27a6a778155ee2fa74b6941e35d1c8fc2c85, size: 1872762}
+          - {name: torch_common_methods_invocations.cpython-312.pyc, sha256: 1d8b5a677c184cb5fed2482771beda22520beabf8f649bf4ce555af5c07fb6af, size: 969662}
+      - id: webassembly-modules
+        type: local
+        licence: LicenseRef-Various
+        provenance: WebAssembly modules from editor extensions and applications
+        files:
+          - {name: resvg.wasm, sha256: 22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70, size: 2478606}
+          - {name: tree-sitter-c-sharp.wasm, sha256: 674da4f2042881ba36b2c38103fe23aef671c8245b8957194a449c28d0e43357, size: 5917000}
+          - {name: tree-sitter-ruby.wasm, sha256: bc8e1ff1b79176ac00ae2010b9be3498304a2d1b6cdf53e88620b136f20e6787, size: 2139740}
+          - {name: tree-sitter-scala.wasm, sha256: b7ec2bb29c19827abcefd18ed5cb5a43596009f96a5d53c5b9d1f9676d7521c3, size: 3786700}

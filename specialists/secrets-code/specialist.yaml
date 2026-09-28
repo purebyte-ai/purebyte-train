@@ -1,0 +1,20 @@
+# secrets-code: finds credentials (API keys, tokens, passwords, private keys, connection strings) in source code and
+# configuration files. See README.md.
+name: secrets-code
+public_name: secrets-code
+description: credentials in source code and configuration files
+plugin: plugin.py                  # registers the `secrets_synthetic` vertical (also used by secrets-bin)
+export:                            # what the exported GGUF declares (spec/FORMAT.md)
+  profile: secrets-code            # the runtime's post-processing profile (spec/OUTPUT.md)
+  labels: [secret]
+  window: {size: 512, stride: 384} # every span up to 128 bytes falls whole inside at least one window
+  license: other                   # informative `general.license*` keys (MODEL_LICENSE.md)
+  license_name: PureByte Model License
+release:
+  ensemble: 3                      # the released seed plus two more ship; the extra two are an OPTIONAL ensemble...
+  vote: 2                          # ...where a finding needs two of three
+exams:                             # evaluation sets whose fingerprints the leak check requires (data/exams/*.yaml)
+  - creddata-test
+  - code-fp-a
+  - code-fp-b
+  - code-fp-c

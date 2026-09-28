@@ -1,0 +1,49 @@
+# A CPU smoke run of the pii factory in a few minutes: the release recipe's data block (label-agnostic, one type PII,
+# labeled public TRAIN documents only) on minimal shapes: 128-byte windows, a few hundred of them, `mini64`, one seed of
+# 300 steps. It reads `pii/public_train` instead of the release pool: the made-up look-alike documents that
+# `python data/build_smoke_data.py` writes on a fresh checkout (with made-up lists and credential formats), or the
+# smaller pool of `data/fetch_pii.py train` once it is there. It proves the pipeline -- the data and its leak checks,
+# the rules rival, training with one type, the operating point, the control, the export and the runtime equivalence --
+# not a model. On the stand-ins it beat the rules and went through `report` in about two minutes on a desktop CPU
+# (the root README's Quick start); a model this small may not beat them elsewhere, and the eval stage records its
+# verdict either way. The `release` stage refuses it: the specialist's exams have no fingerprints on made-up data.
+# tests/ run its data and rival stages on generated look-alike resources.
+#
+#   python data/build_smoke_data.py
+#   python -m pbtrain run specialists/pii/recipes/smoke-cpu.yaml --stages data,baselines,finetune,eval,calibrate,export,verify,report
+name: pii-smoke
+version: 0.0.1
+specialist: pii
+task_type: tag
+output_schema:
+  labels: [PII]
+  per_byte: true
+  min_select_recall: 0.05
+  bias_policy: f1
+data:
+  format: pii_mask
+  path: ${PUREBYTE_DATA}/corpora/smoke-context.bin
+  split_policy: {unit: corpus_range, seed: 0}
+  n_train: 512
+  n_eval: 128
+  seq_len: 128
+  control: shuffled_spans
+  empty_frac: 0.0
+  lists: train
+  lookalikes: text
+  mix: {code: 0.0, data: 0.0, prose: 0.0, email: 0.0, log: 0.0, public: 1.0}
+  public_train:
+    dir: ${PUREBYTE_DATA}/pii/public_train
+train:
+  seeds: [0]
+  mode: causal
+  size: mini64
+  steps: 300
+  lr: 0.003
+  batch: 16
+  decide: false
+criteria:
+  written: 2026-09-24
+  prediction: "the pipeline completes up to the gate; the control stays at ~0"
+  synthetic:
+    - {metric: control_f1, op: "<=", value: 0.10}

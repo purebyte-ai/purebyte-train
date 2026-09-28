@@ -1,0 +1,98 @@
+# Evaluation sets of the PII specialist. Evaluation only: their documents never train (identity check on the dataset
+# splits they come from; content check on 64-byte blocks of every document's text).
+#
+#   python data/fetch_exams.py --set pii-bench-test --set pii-bench-dev --set piimb
+#   python data/fingerprint_exams.py --set pii-bench-test --set pii-bench-dev --set piimb
+#
+# pii-bench-test / pii-bench-dev: a fixed sample (fixed seeds, fixed pages and byte slices, pinned revisions) of the
+# TEST and VALIDATION splits of three synthetic PII datasets, written with their SOURCE labels (character offsets);
+# mapping labels to a model's types is the evaluation harness's job. The two sets are disjoint (whole pages / slices go
+# to one side). DEV may be looked at while developing; TEST is looked at once per released model.
+# piimb: the PII Masking Benchmark (documents and their sentence splits), pinned by revision and sha256. Its licence is
+# CC BY-NC 4.0: it is used to MEASURE only, and nothing derived from it but scores is ever published.
+schema: 1
+kind: exam
+name: pii
+description: Public PII benchmarks (sampled test documents of three synthetic datasets, and PIIMB).
+sets:
+  - name: pii-bench-test
+    role: test
+    fingerprint: jsonl-text
+    description: 4,122 documents sampled from Nemotron-PII TEST, OpenPII-1M VALIDATION (en, es) and Gretel finance TEST.
+    entries:
+      - id: nemotron-pii-test
+        type: hf
+        dataset: nvidia/Nemotron-PII
+        pin: {revision: b70ffaf5ff39e079776134c5bf4381f00a9fd1ed}
+        splits: [test]
+        licence: CC-BY-4.0
+        files: [{name: nemotron-pii.jsonl}]
+        sampling: {method: pages, page: 50, seed: 20260923, test_docs: 1200, dev_docs: 600}
+      - id: openpii-1m-validation
+        type: hf
+        dataset: ai4privacy/pii-masking-openpii-1m
+        pin: {revision: ecfdc547f4a0955600cfe6ab98ba2a162207fcc0}
+        splits: [validation]
+        licence: CC-BY-4.0
+        files: [{name: openpii-1m.jsonl}]
+        sampling: {method: byte-slices, path: data/validation.jsonl, languages: [en, es], slices: 20,
+                   slice_bytes: 600000, test_docs_per_language: 1000, dev_docs_per_language: 500}
+      - id: gretel-finance-test
+        type: hf
+        dataset: gretelai/synthetic_pii_finance_multilingual
+        pin: {revision: 7b844d16738527a04264f50214cb426a4cea0897}
+        splits: [test]
+        licence: Apache-2.0
+        files: [{name: gretel-finance.jsonl}]
+        sampling: {method: all-spanish-plus-english, seed: 20260924, english_test_docs: 600, english_dev_docs: 300}
+
+  - name: pii-bench-dev
+    role: dev
+    fingerprint: jsonl-text
+    description: 2,022 documents from the same splits, disjoint from pii-bench-test (written by the same sampling run).
+    entries:
+      - id: nemotron-pii-test
+        type: hf
+        dataset: nvidia/Nemotron-PII
+        pin: {revision: b70ffaf5ff39e079776134c5bf4381f00a9fd1ed}
+        splits: [test]
+        licence: CC-BY-4.0
+        files: [{name: nemotron-pii.jsonl}]
+      - id: openpii-1m-validation
+        type: hf
+        dataset: ai4privacy/pii-masking-openpii-1m
+        pin: {revision: ecfdc547f4a0955600cfe6ab98ba2a162207fcc0}
+        splits: [validation]
+        licence: CC-BY-4.0
+        files: [{name: openpii-1m.jsonl}]
+      - id: gretel-finance-test
+        type: hf
+        dataset: gretelai/synthetic_pii_finance_multilingual
+        pin: {revision: 7b844d16738527a04264f50214cb426a4cea0897}
+        splits: [test]
+        licence: Apache-2.0
+        files: [{name: gretel-finance.jsonl}]
+
+  - name: piimb
+    role: test
+    fingerprint: jsonl-text
+    description: PII Masking Benchmark, 6 tasks (documents and their sentence splits).
+    usage: evaluation only; CC BY-NC 4.0 (non-commercial), scores only are published
+    entries:
+      - id: piimb-documents
+        type: url
+        url: https://huggingface.co/datasets/piimb/pii-masking-benchmark/resolve/7d797b9fc8dc1942cef60fbe532e7d1a0e31b655/data/test.jsonl
+        pin: {sha256: 400c7fffcc57f7b5a7c19db600eae0fc9205539daf320a7cd25e6eb56fcaca4c, size: 24728217}
+        licence: CC-BY-NC-4.0
+        format: raw
+        identities: ["hf:piimb/pii-masking-benchmark:test", "hf:ai4privacy/pii-masking-openpii-1m:validation",
+                     "hf:nvidia/nemotron-pii:test", "hf:gretelai/gretel-pii-masking-en-v1:test", "hf:piimb/privy:test",
+                     "hf:beki/privy:test", "hf:piimb/mapa-eur-lex-pii:test"]
+        files: [{name: test.jsonl, sha256: 400c7fffcc57f7b5a7c19db600eae0fc9205539daf320a7cd25e6eb56fcaca4c, size: 24728217}]
+      - id: piimb-sentences
+        type: url
+        url: https://huggingface.co/datasets/piimb/pii-masking-benchmark/resolve/7d797b9fc8dc1942cef60fbe532e7d1a0e31b655/data/test_sentences.jsonl
+        pin: {sha256: 5ff46f3a80316318794f94596fa374060d70f2f32a85909f958cbabc70bae41f, size: 60412185}
+        licence: CC-BY-NC-4.0
+        format: raw
+        files: [{name: test_sentences.jsonl, sha256: 5ff46f3a80316318794f94596fa374060d70f2f32a85909f958cbabc70bae41f, size: 60412185}]

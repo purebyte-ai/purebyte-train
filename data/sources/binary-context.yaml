@@ -1,0 +1,2366 @@
+# Real binaries: the CONTEXT bytes the secrets-bin generator plants synthetic credentials into. Built by
+# `python data/build_binary_corpus.py` into $PUREBYTE_DATA/corpora/binary-context.bin (+ .manifest.json,
+# .index.tsv.gz). Schema: data/README.md.
+#
+# Every artifact is public and pinned by sha256 (and version): Debian 13 packages (snapshot.debian.org by file hash,
+# deb.debian.org as mirror; sha256 from the Debian archive), PyPI wheels (sha256 from PyPI), the Go and Python Windows
+# distributions (sha256 published by go.dev / in python.org's Sigstore bundles), Git for Windows, 7-Zip and tree-sitter
+# release assets (sha256 digests of the GitHub releases), and Maven Central jars (sha256 of the artifacts, checked
+# against Maven Central's published SHA-1). `licence` is the artifact's main licence; for Debian packages the build
+# manifest also records the License fields of each package's copyright file.
+#
+# Formats: ELF (x86-64, aarch64, armhf; executables, shared objects, relocatable objects), static libraries (ar),
+# Python bytecode (.pyc of CPython 3.12 and 3.13), PE (Windows x86, x86-64 and ARM64 executables and DLLs), Mach-O
+# (arm64 and x86-64), Java (jars and class files), WebAssembly, firmware images (BIOS/UEFI, network boot ROMs,
+# bootloaders, Wi-Fi firmware).
+#
+# Windows system files (the obvious "real PE" source) are not redistributable and are NOT used: open-source Windows
+# builds (Git for Windows, Python, Go, 7-Zip, PyPI wheels, pywin32, native libraries inside jars) stand in for them.
+# None of these artifacts is an evaluation file (identity check on package+version, URL and sha256; content check on
+# 64-byte blocks when the corpus is built).
+schema: 1
+kind: source
+name: binary-context
+description: Real binaries in many formats (ELF, ar, pyc, PE, Mach-O, Java, WebAssembly, firmware), the context of the
+  secrets-bin generator.
+output: corpora/binary-context.bin
+builder: build_binary_corpus.py
+build:
+  target_mib: 300
+  seed: 0
+  member_bytes: {min: 8192, max: 67108864}   # a member outside this range is not a candidate
+  group_member_min: {pyc: 2048, java: 2048, wasm: 4096, firmware: 4096}
+  span: {max: 262144, min: 4096}             # each file contributes ONE contiguous span (never spliced)
+  symbols: {min_count: 300}                  # an ELF with this many C++ symbol names joins elf_symbols
+  tolerance: 0.03
+  decile_tolerance: 0.05
+  groups:                                    # declared shares (sum 1) and distinct files required
+    elf:         {share: 0.45, min_files: 400}
+    elf_symbols: {share: 0.08, min_files: 60}
+    ar:          {share: 0.07, min_files: 40}
+    pyc:         {share: 0.08, min_files: 400}
+    pe:          {share: 0.17, min_files: 300}
+    macho:       {share: 0.08, min_files: 100}
+    java:        {share: 0.04, min_files: 100}
+    wasm:        {share: 0.01, min_files: 8}
+    firmware:    {share: 0.02, min_files: 10}
+entries:
+  # ---------------------------------------------------------------- Debian 13 (trixie) packages
+  - id: deb-bash-amd64
+    type: deb
+    package: bash
+    arch: amd64
+    url: https://snapshot.debian.org/file/a799b2f88ec119a6bb733554b78703cb725ffb01
+    mirrors: [https://deb.debian.org/debian/pool/main/b/bash/bash_5.2.37-2+b10_amd64.deb]
+    pin: {version: "5.2.37-2+b10", sha256: 2fd7b04f1b7caa29c4e683f5216e6af354a41e3cdcf6e75394d7cda680f9ab82, size: 1500792}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-busybox-amd64
+    type: deb
+    package: busybox
+    arch: amd64
+    url: https://snapshot.debian.org/file/2b7496aaee528bf42f8be2d3709663ab3bb3151d
+    mirrors: [https://deb.debian.org/debian/pool/main/b/busybox/busybox_1.37.0-6+b9_amd64.deb]
+    pin: {version: "1:1.37.0-6+b9", sha256: b88c3b899e16bf64347d63235128df9efbcf1f964e4841bc9b37d7856bed35bf, size: 484988}
+    licence: GPL-2.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-bzip2-amd64
+    type: deb
+    package: bzip2
+    arch: amd64
+    url: https://snapshot.debian.org/file/fddc4a36f535ca9530e72b0bd42b4d6bc9e91218
+    mirrors: [https://deb.debian.org/debian/pool/main/b/bzip2/bzip2_1.0.8-6_amd64.deb]
+    pin: {version: "1.0.8-6", sha256: 6b5fbe71f0fc41e85919bc4b3c514e6c47577c5005dbf1f5af6e4a49cc221aab, size: 40520}
+    licence: bzip2-1.0.6
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-coreutils-amd64
+    type: deb
+    package: coreutils
+    arch: amd64
+    url: https://snapshot.debian.org/file/b030cfa538f5265585eb5d8a08af1cc65d855dab
+    mirrors: [https://deb.debian.org/debian/pool/main/c/coreutils/coreutils_9.7-3_amd64.deb]
+    pin: {version: "9.7-3", sha256: 1299ab6f9389a288eb2f5f3dd222c26cc777b9a2d5ecb6ee4cbd340cebcdada2, size: 3023556}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-curl-amd64
+    type: deb
+    package: curl
+    arch: amd64
+    url: https://snapshot.debian.org/file/af74ff1df8e802af47a2db6465464b11b8cdb1f2
+    mirrors: [https://deb.debian.org/debian/pool/main/c/curl/curl_8.14.1-2+deb13u5_amd64.deb]
+    pin: {version: "8.14.1-2+deb13u5", sha256: ebb7e0cbe30ad23bce0d28a848ccfeb9b73b82817eb4fe12fa20d2845f62dc73, size: 270064}
+    licence: curl
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-diffutils-amd64
+    type: deb
+    package: diffutils
+    arch: amd64
+    url: https://snapshot.debian.org/file/e3bb06b8e1842b3876f98c276d12bf98b51fd907
+    mirrors: [https://deb.debian.org/debian/pool/main/d/diffutils/diffutils_3.10-4_amd64.deb]
+    pin: {version: "1:3.10-4", sha256: d3412669f7ae53ba895c3a509620ea7494ec1a36faa204c5215442ced381a479, size: 386504}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-dpkg-amd64
+    type: deb
+    package: dpkg
+    arch: amd64
+    url: https://snapshot.debian.org/file/1e0baaf640e70d3e141e26863898eaee6e2b6e11
+    mirrors: [https://deb.debian.org/debian/pool/main/d/dpkg/dpkg_1.22.22_amd64.deb]
+    pin: {version: "1.22.22", sha256: 3e800c6d75e8e709007ed1c356e5fa8509a75c1694fb0a1183709abc9cfdc1f3, size: 1537216}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-findutils-amd64
+    type: deb
+    package: findutils
+    arch: amd64
+    url: https://snapshot.debian.org/file/61921be671ffab5ab351306b9cde74a0987cd62a
+    mirrors: [https://deb.debian.org/debian/pool/main/f/findutils/findutils_4.10.0-3_amd64.deb]
+    pin: {version: "4.10.0-3", sha256: 3edf02b016456b6a98cefdbab99c5ce6f829b786f63affe970badea221aecfc7, size: 700008}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-gpg-amd64
+    type: deb
+    package: gpg
+    arch: amd64
+    url: https://snapshot.debian.org/file/22352a7590c645a2813fb6840274b41451ed7b2e
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gnupg2/gpg_2.4.7-21+deb13u1+b5_amd64.deb]
+    pin: {version: "2.4.7-21+deb13u1+b5", sha256: 3aeedf3d223e5e6aff08f03227af6ce308f4317472609f383350fd2ec20d33ae, size: 636212}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-grep-amd64
+    type: deb
+    package: grep
+    arch: amd64
+    url: https://snapshot.debian.org/file/acab56dcc116f8299c197dff8e071559a4c0cbf9
+    mirrors: [https://deb.debian.org/debian/pool/main/g/grep/grep_3.11-4_amd64.deb]
+    pin: {version: "3.11-4", sha256: 2d78ed07d86a530ebf538f05cb2415f37c8daf908596bc32fc2563cc7e88c55a, size: 431488}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-gzip-amd64
+    type: deb
+    package: gzip
+    arch: amd64
+    url: https://snapshot.debian.org/file/d5b3e5eb7dbe001bb4b3b5adb5149f0992719aed
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gzip/gzip_1.13-1+deb13u1_amd64.deb]
+    pin: {version: "1.13-1+deb13u1", sha256: 74cf12212beee4ab8d473bdc0107abf9e8cef737492198e2f4944a19f142b0ac, size: 138608}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-iproute2-amd64
+    type: deb
+    package: iproute2
+    arch: amd64
+    url: https://snapshot.debian.org/file/a1cd30144cc86fe22948a5d1798cf83df1482822
+    mirrors: [https://deb.debian.org/debian/pool/main/i/iproute2/iproute2_6.15.0-1_amd64.deb]
+    pin: {version: "6.15.0-1", sha256: 7b2dcade4a83ded723fcab21c5a53c47f29352c9c5e1661a089a1e481b3fb48a, size: 1089184}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libabsl-dev-amd64
+    type: deb
+    package: libabsl-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/3004411469ec7796fb1037d7f3d1ba1169b3df6e
+    mirrors: [https://deb.debian.org/debian/pool/main/a/abseil/libabsl-dev_20240722.0-4_amd64.deb]
+    pin: {version: "20240722.0-4", sha256: 5036eacaaa092524fa2fdb2ae6ce0db188ee2c6a742dc3d6986151ab2dfc8a92, size: 1250848}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libabsl20240722-amd64
+    type: deb
+    package: libabsl20240722
+    arch: amd64
+    url: https://snapshot.debian.org/file/ae1afaad597e84f87f29641315d8f646b14663f3
+    mirrors: [https://deb.debian.org/debian/pool/main/a/abseil/libabsl20240722_20240722.0-4_amd64.deb]
+    pin: {version: "20240722.0-4", sha256: 78c6d7692890990a27cb1d5bbd95b7bfe47a4183ffafec5b30f689f9b58ec6f7, size: 491548}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libavcodec61-amd64
+    type: deb
+    package: libavcodec61
+    arch: amd64
+    url: https://snapshot.debian.org/file/92c9861814a154ba603666a0143bb86cceb8f6ad
+    mirrors: [https://deb.debian.org/debian/pool/main/f/ffmpeg/libavcodec61_7.1.5-0+deb13u1_amd64.deb]
+    pin: {version: "7:7.1.5-0+deb13u1", sha256: 6c07da16b276827973463bdd22607721df1c2877641c753d2418cf6bf49a0f2e, size: 5821268}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-atomic1.83.0-amd64
+    type: deb
+    package: libboost-atomic1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/4dfb7692dff115cbb1254b079cc6813eb1d01733
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-atomic1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 2b612ebd5a7d9bfcd395af58c05b1b55e9e83f4b93db182fb269dd8478d27e54, size: 234080}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-container1.83.0-amd64
+    type: deb
+    package: libboost-container1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/e63ac1c56eda21f2cf706b5dc008c7d439f4ac35
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-container1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 76a4c861caa810b9fc3d0d44954020e3aa6f1cf845a753e5e17a9f8a5567f862, size: 259620}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-context1.83.0-amd64
+    type: deb
+    package: libboost-context1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/78d0916777c2efcc5d1d716242d6b59c4124150e
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-context1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 95951c6f8509608a53f26d4ac3015c326867a43b22b1004c387ff0dad6558510, size: 231496}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-contract1.83.0-amd64
+    type: deb
+    package: libboost-contract1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/b4920c8eb612e522c003930ad165dd35a3442aef
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-contract1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 03552ca040ee8e1ce80ecd6658a1b56a23b2194cb5ad736ff2163f510fd36a35, size: 257160}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-date-time1.83.0-amd64
+    type: deb
+    package: libboost-date-time1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/b1e3ad66b38fc1f5ae9f8612837846c2a5a959f9
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-date-time1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 5e13c1cf49e2f7e5fafdaf6687c6d6783ccd7e1ffb30e3171a0f0ed80083ba7e, size: 230316}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-fiber1.83.0-amd64
+    type: deb
+    package: libboost-fiber1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/c34bc8ebe2b2ac950b6e85a7f5e3e197a3384aef
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-fiber1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 5cbb8ede34231343a4e61b54cbe6d00cc3f8c19adfb1eea61edf356e9bdf1d22, size: 254380}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-filesystem1.83.0-amd64
+    type: deb
+    package: libboost-filesystem1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/97aee461b0a85eb327803ee8ee67f7568488f5ae
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-filesystem1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 6b587623a4fd1824613e7ee02ba35b84cd9534b520b7f3d08d15f9ed85f28cf3, size: 281648}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-graph1.83.0-amd64
+    type: deb
+    package: libboost-graph1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/9682a14345119e1b5b194eab5c5123830ba42b54
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-graph1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 4900c22f2c6e85b7076434ad01f4c60dfec1bdc0cfcd83d775066586122f1d25, size: 359052}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-iostreams1.83.0-amd64
+    type: deb
+    package: libboost-iostreams1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/d420f9549d48fa915a9112a205445d2ac44d74c3
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-iostreams1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 65db6c6900a35c44a23e680aa9f5b93ce6fd51c6b18eb74f64cecbd824077386, size: 253636}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-json1.83.0-amd64
+    type: deb
+    package: libboost-json1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/bc1259655370aa8d9d54300678737ccae5a5a79e
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-json1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: d495ba2ebee6527258fdc6d6c49c0c6cee3f515dcbefaf19611fc8e962dd7e5c, size: 356808}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-locale1.83.0-amd64
+    type: deb
+    package: libboost-locale1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/a750c4c79ce0812744ca64f2805c750d0af3c35f
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-locale1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 789910787b4effef1f6d54422bfbafa55f315d261528b8079def49d6ea53c931, size: 472572}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-log1.83.0-amd64
+    type: deb
+    package: libboost-log1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/11fe67bf5b388963b05d2ebe6f96db033da099ce
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-log1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 0e49cec50c8efd7d7e59c4504095a21b9a27651056f530b576d7d899ede9e1b3, size: 708476}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-nowide1.83.0-amd64
+    type: deb
+    package: libboost-nowide1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/387922af54a471de503f0677d235ba3ed355e4d0
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-nowide1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 32ff45dcb1603fccd0cd4409c8e5c375274f76e2013a1ad393b6cdd60bd7d71b, size: 234364}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-program-options1.83.0-amd64
+    type: deb
+    package: libboost-program-options1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/a507580cf3b3c53a98ba405b89098077207832da
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-program-options1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: dc5fa835e9362fd3d285ccb0aeaecada4954b9a2ccf765891af868482edeb6f4, size: 347316}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-random1.83.0-amd64
+    type: deb
+    package: libboost-random1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/3049f2c38205b18f5ba9ac97585ee1666102f327
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-random1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 45b35150b9dd9eeb2d69ae8b3e70821318886115343f09023b98e0e5d2f4a891, size: 238404}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-regex1.83.0-amd64
+    type: deb
+    package: libboost-regex1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/029474d7d5e5b4f5b48a57059547d56f82cd329f
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-regex1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: e4d58b5ae30bb30a7701016dc25dd316878001a8e1a76e5afadd49ccc8d425d3, size: 329688}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-serialization1.83.0-amd64
+    type: deb
+    package: libboost-serialization1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/3be076478c9bd0b055473c25f6b03d46421de9b9
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-serialization1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 5c0f28f2464e72c16c01440db47122e23ae0b4147e11e0e6d3b4ced86190324c, size: 333492}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-test1.83.0-amd64
+    type: deb
+    package: libboost-test1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/072d077ac415dcfdc6068d1ab11841d6bda2c379
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-test1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 26e093572904a5ac681d8e201822245c6ab24376d6df30b33543d8630b7806ab, size: 471008}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-thread1.83.0-amd64
+    type: deb
+    package: libboost-thread1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/777eb098a062606f6ec59de77b228ae967ce6a59
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-thread1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: 00d3ec4fa47bb2bab1afa3ef5cd354e1afd47eacf08bb7db6c4092218008ebbb, size: 269544}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-timer1.83.0-amd64
+    type: deb
+    package: libboost-timer1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/5c4cb9c9b513044152fde9a6eca9e385614ee8d4
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-timer1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: e2817022e8dbc3384e140b18de16ef3442f63ef45aebf23bce70957999fb29a3, size: 234856}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-type-erasure1.83.0-amd64
+    type: deb
+    package: libboost-type-erasure1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/95ec416300b10dc0707901ffd8ce577b10fe527f
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-type-erasure1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: fe54ad8ccfb2dc69dac1620fd2db2405011431495bf827fd879b3924c03eb657, size: 245568}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-url1.83.0-amd64
+    type: deb
+    package: libboost-url1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/232706590a9acff49c47cdb5fc9ee24d69d02a8d
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-url1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: ad594f1afbcd0d9b9015a951fbdd86620483b9213f665b430d5da1ef3674a7b5, size: 335812}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libboost-wave1.83.0-amd64
+    type: deb
+    package: libboost-wave1.83.0
+    arch: amd64
+    url: https://snapshot.debian.org/file/fb04d4494d1be7f382c7906d9922ef2aef49fae8
+    mirrors: [https://deb.debian.org/debian/pool/main/b/boost1.83/libboost-wave1.83.0_1.83.0-4.2_amd64.deb]
+    pin: {version: "1.83.0-4.2", sha256: b1852ad8092cd704a405beee90627b5d6c6fc262e736200be9bd377a44fcd452, size: 437088}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libbz2-dev-amd64
+    type: deb
+    package: libbz2-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/ca72c37ff19b901b427ab9489e6baa6894a95577
+    mirrors: [https://deb.debian.org/debian/pool/main/b/bzip2/libbz2-dev_1.0.8-6_amd64.deb]
+    pin: {version: "1.0.8-6", sha256: b395471bf69087a18a6baa04d68a9d50497b20f8a2602d9729c7069f820bbe6b, size: 31368}
+    licence: bzip2-1.0.6
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libc-bin-amd64
+    type: deb
+    package: libc-bin
+    arch: amd64
+    url: https://snapshot.debian.org/file/5262f3fa760a16acde1903de0f1ddc0be8cca6da
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glibc/libc-bin_2.41-12+deb13u4_amd64.deb]
+    pin: {version: "2.41-12+deb13u4", sha256: dc8c79647fe3a5f37f72a400414f70263d0212f010ff2c09f990e30d91e38d1c, size: 638452}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libc6-amd64
+    type: deb
+    package: libc6
+    arch: amd64
+    url: https://snapshot.debian.org/file/27904cc1b58dd79f0768ba6aa6dd993edc411b97
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.41-12+deb13u4_amd64.deb]
+    pin: {version: "2.41-12+deb13u4", sha256: 967aa62605721081c3eb2a17650611a792aa802d76a6511d1840242623d204c9, size: 2846580}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/lib/**", "usr/bin/*", "usr/sbin/*"], exclude: ["**/libc.so.6"]}
+  - id: deb-libc6-dev-amd64
+    type: deb
+    package: libc6-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/f3859a3c0528bb85c746a18270793b295d2c80dc
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.41-12+deb13u4_amd64.deb]
+    pin: {version: "2.41-12+deb13u4", sha256: 1fda734dabcd80b77266a09ab62b0f1e3e16d8091db62899890b2200745632a2, size: 1994660}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libclang-cpp19-amd64
+    type: deb
+    package: libclang-cpp19
+    arch: amd64
+    url: https://snapshot.debian.org/file/436e341b9f66dc5fd1af6fdfa643133bf2938701
+    mirrors: [https://deb.debian.org/debian/pool/main/l/llvm-toolchain-19/libclang-cpp19_19.1.7-3+b1_amd64.deb]
+    pin: {version: "1:19.1.7-3+b1", sha256: a7d2b6df51050834f6ea5c0d5e34869c2298b0bcdaa91eff17ba3db2cd545c47, size: 13191148}
+    licence: Apache-2.0 WITH LLVM-exception
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libcrypto++8t64-amd64
+    type: deb
+    package: libcrypto++8t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/d9ecc4c3c511157f995d6ac82fd684f90e044197
+    mirrors: [https://deb.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++8t64_8.9.0-2_amd64.deb]
+    pin: {version: "8.9.0-2", sha256: 108cb47e01ae0f2e1735d25d2eba24bdca1c9121c02f737b1b935685957f3f72, size: 1168384}
+    licence: BSL-1.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libcurl4-openssl-dev-amd64
+    type: deb
+    package: libcurl4-openssl-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/63fd8a7284b19f814a2d29b4360e5abd9f072d2a
+    mirrors: [https://deb.debian.org/debian/pool/main/c/curl/libcurl4-openssl-dev_8.14.1-2+deb13u5_amd64.deb]
+    pin: {version: "8.14.1-2+deb13u5", sha256: c3f637fde2904732cac10669b9ad774268ba331f2f9de29c53dcdac3bc092e8a, size: 511264}
+    licence: curl
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libcurl4t64-amd64
+    type: deb
+    package: libcurl4t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/df4648d677695dc4fab8714dc297bce2b8bb53d0
+    mirrors: [https://deb.debian.org/debian/pool/main/c/curl/libcurl4t64_8.14.1-2+deb13u5_amd64.deb]
+    pin: {version: "8.14.1-2+deb13u5", sha256: 0dedddfe614fc4a4335c9167b73c64a50136edd76b7991aa851408d0795163eb, size: 391492}
+    licence: curl
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libexpat1-dev-amd64
+    type: deb
+    package: libexpat1-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/0faae63f62bb7ba9a823b357828dab7eec49cf35
+    mirrors: [https://deb.debian.org/debian/pool/main/e/expat/libexpat1-dev_2.8.3-1~deb13u1_amd64.deb]
+    pin: {version: "2.8.3-1~deb13u1", sha256: 13f69f5290374c8403d2114b91cc8d0e6bb7b74e9e2512b7e04557546c922749, size: 178864}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libffi-dev-amd64
+    type: deb
+    package: libffi-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/8f438f832d31cd74325bf32f8fa00b64e06322ce
+    mirrors: [https://deb.debian.org/debian/pool/main/libf/libffi/libffi-dev_3.4.8-2_amd64.deb]
+    pin: {version: "3.4.8-2", sha256: 76b2b80193a656733e1408ebec5371334be5fd48eb5f50ab99d6baf6081d0f1b, size: 61136}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libfmt-dev-amd64
+    type: deb
+    package: libfmt-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/fd2cbe5a5b4f28b02dccdd50a1e5ea7e20c8b7aa
+    mirrors: [https://deb.debian.org/debian/pool/main/f/fmtlib/libfmt-dev_10.1.1+ds1-4_amd64.deb]
+    pin: {version: "10.1.1+ds1-4", sha256: c084df80e2842bc57157e8def529f4ca6bc8743d005550b56a5ef96c9bc92f0f, size: 177208}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libfmt10-amd64
+    type: deb
+    package: libfmt10
+    arch: amd64
+    url: https://snapshot.debian.org/file/ea0a2ba6ecf8dcce23444835afef0bdff2c1e765
+    mirrors: [https://deb.debian.org/debian/pool/main/f/fmtlib/libfmt10_10.1.1+ds1-4_amd64.deb]
+    pin: {version: "10.1.1+ds1-4", sha256: da77a5254e5c7cdac6ecf6f8f21a9cc93d64392765f0f0a4dd06805238950fbe, size: 126732}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgcc-14-dev-amd64
+    type: deb
+    package: libgcc-14-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/9581fae9cbf1bb9b8e9c59405f71259c5bb8524f
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-19_amd64.deb]
+    pin: {version: "14.2.0-19", sha256: ca6f2d36d96b19b3eb71405b0b80134d8c89380b02204a2512e5c58ceb090628, size: 2672328}
+    licence: GPL-3.0-or-later WITH GCC-exception-3.1
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgcrypt20-amd64
+    type: deb
+    package: libgcrypt20
+    arch: amd64
+    url: https://snapshot.debian.org/file/3db7bbd3a4b5752e0a285a6d92c5fa2ed68d644b
+    mirrors: [https://deb.debian.org/debian/pool/main/libg/libgcrypt20/libgcrypt20_1.11.0-7+deb13u1_amd64.deb]
+    pin: {version: "1.11.0-7+deb13u1", sha256: f0eb41f8cb40896e0822e9ab65611e8383c12b721c76c54764f744abb4a8c247, size: 843104}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgeos3.13.1-amd64
+    type: deb
+    package: libgeos3.13.1
+    arch: amd64
+    url: https://snapshot.debian.org/file/94741970029e0c1bdfdf9883c8fafcc4e613e359
+    mirrors: [https://deb.debian.org/debian/pool/main/g/geos/libgeos3.13.1_3.13.1-1_amd64.deb]
+    pin: {version: "3.13.1-1", sha256: 174b08f3092a8f10cf51d618d934d9703b88b4c51abf41d33535a12b7797e970, size: 970340}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgflags2.2-amd64
+    type: deb
+    package: libgflags2.2
+    arch: amd64
+    url: https://snapshot.debian.org/file/2887b5f77502c5a666141501b297d3c9cdd90d38
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gflags/libgflags2.2_2.2.2-2_amd64.deb]
+    pin: {version: "2.2.2-2", sha256: 288af17a1d3a0955f56c8347ea81bd33534add8b22c5b1b4771d8ac1c85b5ba0, size: 83452}
+    licence: BSD-3-Clause
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libglib2.0-0t64-amd64
+    type: deb
+    package: libglib2.0-0t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/41b72c2a7108da52740adfd489a1988f1155d807
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glib2.0/libglib2.0-0t64_2.84.4-3~deb13u5_amd64.deb]
+    pin: {version: "2.84.4-3~deb13u5", sha256: e2baf92c57d1db1753e5781a61450d9a01e7833c7bd2dfe87776a6811c11ecc2, size: 1521120}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgmp-dev-amd64
+    type: deb
+    package: libgmp-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/89c31c2173171aee7f43869578fd0011f6ae50f3
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gmp/libgmp-dev_6.3.0+dfsg-3_amd64.deb]
+    pin: {version: "2:6.3.0+dfsg-3", sha256: 68f392cc03f896ecc3764eb4844d2a898ff016f47dda160465f152f811152b81, size: 642124}
+    licence: LGPL-3.0-or-later OR GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgnutls30t64-amd64
+    type: deb
+    package: libgnutls30t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/72f4c6cf757e4af0acf000271eec501c06f7a97d
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gnutls28/libgnutls30t64_3.8.9-3+deb13u4_amd64.deb]
+    pin: {version: "3.8.9-3+deb13u4", sha256: 18a8bdfd91c7e3bcb01719d55a2b56849c7160b34f1f52b1c4fdfdd41bf1352b, size: 1469024}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgrpc++1.51t64-amd64
+    type: deb
+    package: libgrpc++1.51t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/85ede3f2b83e1ca865bd3cde274168b46e2a2b33
+    mirrors: [https://deb.debian.org/debian/pool/main/g/grpc/libgrpc++1.51t64_1.51.1-6_amd64.deb]
+    pin: {version: "1.51.1-6", sha256: af6c139e11d81f828e4e57cc027aeffe3379d3516586408d7fd88a98b1b26ed9, size: 497196}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libgtk-3-0t64-amd64
+    type: deb
+    package: libgtk-3-0t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/a58716d41887931defc22804135641fafa0bc14f
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gtk+3.0/libgtk-3-0t64_3.24.49-3_amd64.deb]
+    pin: {version: "3.24.49-3", sha256: 4aa8828f01365f937f3bf69f812c8107ee4c8a2b208ffdd7656e8de5de81d98f, size: 2768812}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libicu76-amd64
+    type: deb
+    package: libicu76
+    arch: amd64
+    url: https://snapshot.debian.org/file/64267d4651f634bb7e01190e6cd56da176a792ed
+    mirrors: [https://deb.debian.org/debian/pool/main/i/icu/libicu76_76.1-4_amd64.deb]
+    pin: {version: "76.1-4", sha256: c1bf762996de9ecba9b9d871e4928a8090f023a3e9e7fa3240b3d90f892a01dc, size: 9722072}
+    licence: Unicode-3.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libjpeg62-turbo-dev-amd64
+    type: deb
+    package: libjpeg62-turbo-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/6e4f650fbd0c33f8ae6d674d298cdfeae099b9de
+    mirrors: [https://deb.debian.org/debian/pool/main/libj/libjpeg-turbo/libjpeg62-turbo-dev_2.1.5-4_amd64.deb]
+    pin: {version: "1:2.1.5-4", sha256: e687e3c8b24a3aa74974928b8e0b07f6df2442187492d85cbcea7dacd91e3aba, size: 291604}
+    licence: IJG AND BSD-3-Clause AND Zlib
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libjsoncpp26-amd64
+    type: deb
+    package: libjsoncpp26
+    arch: amd64
+    url: https://snapshot.debian.org/file/6ad049c35173d62b6d4d57915c8ffcbeb1cc30a4
+    mirrors: [https://deb.debian.org/debian/pool/main/libj/libjsoncpp/libjsoncpp26_1.9.6-3_amd64.deb]
+    pin: {version: "1.9.6-3", sha256: fd0b75839fe7b1a08df49e4203b1fb042df4f7d982db8d91c1fd7bdbcd4b1460, size: 81684}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libleveldb1d-amd64
+    type: deb
+    package: libleveldb1d
+    arch: amd64
+    url: https://snapshot.debian.org/file/3a82e76461a9ebbda60f41e7451d6c0a2829d707
+    mirrors: [https://deb.debian.org/debian/pool/main/l/leveldb/libleveldb1d_1.23-5+b2_amd64.deb]
+    pin: {version: "1.23-5+b2", sha256: 25caa81232371c9800e273f3fbc01dced239fd560b489bd277d0b29113a50424, size: 135768}
+    licence: BSD-3-Clause
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libllvm19-amd64
+    type: deb
+    package: libllvm19
+    arch: amd64
+    url: https://snapshot.debian.org/file/1815a811f2dcc3c2b27c41f015af2223eb3a5d74
+    mirrors: [https://deb.debian.org/debian/pool/main/l/llvm-toolchain-19/libllvm19_19.1.7-3+b1_amd64.deb]
+    pin: {version: "1:19.1.7-3+b1", sha256: db0d614d61345ca710fb73e75105f1ec6e38898fa7b3aa99fa7eb7d8b0a11d57, size: 25978316}
+    licence: Apache-2.0 WITH LLVM-exception
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-liblzma-dev-amd64
+    type: deb
+    package: liblzma-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/628481d2a028ed8970d40d40241635975d2ea6c1
+    mirrors: [https://deb.debian.org/debian/pool/main/x/xz-utils/liblzma-dev_5.8.1-1+deb13u1_amd64.deb]
+    pin: {version: "5.8.1-1+deb13u1", sha256: adb39ccf80b0a4347e303920a0b2c4e4f9bbca318f68e8c768dfec8029013c7a, size: 348120}
+    licence: 0BSD
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libncurses-dev-amd64
+    type: deb
+    package: libncurses-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/e14183a68d59c151293b551e0e0923c189d94b3b
+    mirrors: [https://deb.debian.org/debian/pool/main/n/ncurses/libncurses-dev_6.5+20250216-2_amd64.deb]
+    pin: {version: "6.5+20250216-2", sha256: 6bd7804e243fc08e2a2af380c341998bb6d21dd35550588ecc430d7c488a410d, size: 352848}
+    licence: X11-distribute-modifications-variant
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libopencv-core410-amd64
+    type: deb
+    package: libopencv-core410
+    arch: amd64
+    url: https://snapshot.debian.org/file/57598146247795d0acccaf6fcbb718f11454e4dd
+    mirrors: [https://deb.debian.org/debian/pool/main/o/opencv/libopencv-core410_4.10.0+dfsg-5_amd64.deb]
+    pin: {version: "4.10.0+dfsg-5", sha256: ddd73cfe62b22f44fa3448ee04433062fb8b84a3ffb86db2e0d691180667c1a3, size: 1161608}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libopencv-dnn410-amd64
+    type: deb
+    package: libopencv-dnn410
+    arch: amd64
+    url: https://snapshot.debian.org/file/add81556850f51091f34a070e9bda795b22082da
+    mirrors: [https://deb.debian.org/debian/pool/main/o/opencv/libopencv-dnn410_4.10.0+dfsg-5_amd64.deb]
+    pin: {version: "4.10.0+dfsg-5", sha256: 66a0ee15db240035c340f03a5a07ad851eea5d53ce31244e660e772a1b6bfa06, size: 1433980}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libopencv-imgcodecs410-amd64
+    type: deb
+    package: libopencv-imgcodecs410
+    arch: amd64
+    url: https://snapshot.debian.org/file/078572ef8c23d794f79b57c44f11bd369c35e905
+    mirrors: [https://deb.debian.org/debian/pool/main/o/opencv/libopencv-imgcodecs410_4.10.0+dfsg-5_amd64.deb]
+    pin: {version: "4.10.0+dfsg-5", sha256: fd14ae1518456b67ca998a92c81bcae4c9e7da793893ef6caf405fa295887497, size: 148380}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libopencv-imgproc410-amd64
+    type: deb
+    package: libopencv-imgproc410
+    arch: amd64
+    url: https://snapshot.debian.org/file/d85ceb1b4cf6b58e2612b924b381eafdf9e2858a
+    mirrors: [https://deb.debian.org/debian/pool/main/o/opencv/libopencv-imgproc410_4.10.0+dfsg-5_amd64.deb]
+    pin: {version: "4.10.0+dfsg-5", sha256: 64cfbf33689eea9165a7f52611655d35e8fee772f3cedaf791fefce9fa51c280, size: 1458524}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpcre2-dev-amd64
+    type: deb
+    package: libpcre2-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/adefc2b866922a414fe22ac25b456250d9c6e29f
+    mirrors: [https://deb.debian.org/debian/pool/main/p/pcre2/libpcre2-dev_10.46-1~deb13u2_amd64.deb]
+    pin: {version: "10.46-1~deb13u2", sha256: f031c53b8f77c2825d9d6c71c0d8bd6106d6599af1655074b62074a10f7f7c6c, size: 852376}
+    licence: BSD-3-Clause
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpng-dev-amd64
+    type: deb
+    package: libpng-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/5db64ea60be3c1b7957a68449c25c11a8da668be
+    mirrors: [https://deb.debian.org/debian/pool/main/libp/libpng1.6/libpng-dev_1.6.48-1+deb13u5_amd64.deb]
+    pin: {version: "1.6.48-1+deb13u5", sha256: 9027d5ace59ce266124c87054302805f49f9cb1ec4a6c8264a64596c7916fbff, size: 367368}
+    licence: Libpng
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpoppler147-amd64
+    type: deb
+    package: libpoppler147
+    arch: amd64
+    url: https://snapshot.debian.org/file/2b415c92250567f42afff797e1374fb560b95a07
+    mirrors: [https://deb.debian.org/debian/pool/main/p/poppler/libpoppler147_25.03.0-5+deb13u4_amd64.deb]
+    pin: {version: "25.03.0-5+deb13u4", sha256: 2466115f6d92266415f53c5fb88348d980710880bae888d96d6e3cc3a0a1ed3b, size: 2036064}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpython3.13-amd64
+    type: deb
+    package: libpython3.13
+    arch: amd64
+    url: https://snapshot.debian.org/file/8d3ecf766c4f35e7324eaf98d201b6c7722bdc75
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13_3.13.5-2+deb13u5_amd64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: aa4cdb7e15f5f445ab268160d428518a4daf2a086ee3e6ea30f6082785236dea, size: 2159760}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpython3.13-dev-amd64
+    type: deb
+    package: libpython3.13-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/e9941ca189c06a92ef90abee3014ff650c635b3b
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13-dev_3.13.5-2+deb13u5_amd64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: 4bd7b17ffbeb367ce1fef8b6ff02536a25f29fc07372d1bdd3ed1e1faa5b9409, size: 5285588}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libpython3.13-stdlib-amd64
+    type: deb
+    package: libpython3.13-stdlib
+    arch: amd64
+    url: https://snapshot.debian.org/file/c8d9cc73aab111fac7dc1b26c6e2ffda7af08f04
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13-stdlib_3.13.5-2+deb13u5_amd64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: db161322a3481d2c0c3b9a3b9a03c3ab0e2b1718f54b88755fb4a3f939165b84, size: 1958624}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6core6t64-amd64
+    type: deb
+    package: libqt6core6t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/1cb59f0301b0c86b6fc7dec8d0402c21281d2fa2
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6core6t64_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: c7691937813e6cdf712aa98013bcac9d414f6fdeaea041ff53de5f8ae9b58e10, size: 1842868}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6dbus6-amd64
+    type: deb
+    package: libqt6dbus6
+    arch: amd64
+    url: https://snapshot.debian.org/file/3e1b8ef4017df7dc3183246960c6cf8e5deac783
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6dbus6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: ea2b6563e4e3f6c8c2838453cb2e0e70933e5e08fde6b8dc5ca7cefad9c80764, size: 265692}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6gui6-amd64
+    type: deb
+    package: libqt6gui6
+    arch: amd64
+    url: https://snapshot.debian.org/file/26ff3f97be07b060a03ff09bb89ef2c49c9f8fd9
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6gui6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: a39717b874f7b71c69f27199299dc09d5f47b809af3064cf067e5e443b5d011b, size: 3151212}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6network6-amd64
+    type: deb
+    package: libqt6network6
+    arch: amd64
+    url: https://snapshot.debian.org/file/9499b79286ce5145a0fa3318456ca524cba46d08
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6network6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: 394b3645254a9c2a4a24957d5cf32e3e6aab66c15a6f2cc9aa2298622bbd2f61, size: 803488}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6sql6-amd64
+    type: deb
+    package: libqt6sql6
+    arch: amd64
+    url: https://snapshot.debian.org/file/1aac455e992a6f3c4ae472001482f1067c891516
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6sql6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: 430249fe698e14488337064d7177aa8b630e16a35d2dd3bdda79fe83f956fff9, size: 144520}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6widgets6-amd64
+    type: deb
+    package: libqt6widgets6
+    arch: amd64
+    url: https://snapshot.debian.org/file/8ca7a14fea0f601067047e3c94e4a05446ace29b
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6widgets6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: f61ccd0c809a665a6061c6a28d265965e8712e616599a81e50699ff8394afeea, size: 2642628}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6xml6-amd64
+    type: deb
+    package: libqt6xml6
+    arch: amd64
+    url: https://snapshot.debian.org/file/53de19803a9b5a368099f232809de71cb0e35e80
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6xml6_6.8.2+dfsg-9+deb13u2_amd64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: 6ba7668e09150684cf98578862ac1c507583495db4581e5eda301dd210c71c4e, size: 85968}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libre2-11-amd64
+    type: deb
+    package: libre2-11
+    arch: amd64
+    url: https://snapshot.debian.org/file/407813ed6c66a741542941843156632c161cf9fe
+    mirrors: [https://deb.debian.org/debian/pool/main/r/re2/libre2-11_20240702-3+b1_amd64.deb]
+    pin: {version: "20240702-3+b1", sha256: 128136b987e90b41d1ace03348fcf42fbfb9fec8bb9294332b13eaeadfec4062, size: 168920}
+    licence: BSD-3-Clause
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-librocksdb9.10-amd64
+    type: deb
+    package: librocksdb9.10
+    arch: amd64
+    url: https://snapshot.debian.org/file/7d0c58da1633531938c54fa0cf91be3db0d51a99
+    mirrors: [https://deb.debian.org/debian/pool/main/r/rocksdb/librocksdb9.10_9.10.0-1+b1_amd64.deb]
+    pin: {version: "9.10.0-1+b1", sha256: 434b2aa038b286d378ddeecea8a50ee455b6d261156d7928b95acecc1cec49a8, size: 3922968}
+    licence: Apache-2.0 OR GPL-2.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libsodium-dev-amd64
+    type: deb
+    package: libsodium-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/8637813e2c1b3ddb13dbb27c5fbd0bbf437610ed
+    mirrors: [https://deb.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.18-1+deb13u1_amd64.deb]
+    pin: {version: "1.0.18-1+deb13u1", sha256: eb6425199b9ecd4a997a834be40dbef6ccf3974da9fe6b2c07cfed5d56423c40, size: 184532}
+    licence: ISC
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libspdlog1.15-amd64
+    type: deb
+    package: libspdlog1.15
+    arch: amd64
+    url: https://snapshot.debian.org/file/e5f2677610d4634f3f198da12df76efb0c26ae82
+    mirrors: [https://deb.debian.org/debian/pool/main/s/spdlog/libspdlog1.15_1.15.2+ds-2_amd64.deb]
+    pin: {version: "1:1.15.2+ds-2", sha256: c0e95528c3e04e9e69493c2f875ac3e1477a59ddbd82b2cfdeb2fcf47468ac45, size: 108240}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libsqlite3-0-amd64
+    type: deb
+    package: libsqlite3-0
+    arch: amd64
+    url: https://snapshot.debian.org/file/5dcd8c2e2a17ccf50d216e49d5c66d24b370858c
+    mirrors: [https://deb.debian.org/debian/pool/main/s/sqlite3/libsqlite3-0_3.46.1-7+deb13u2_amd64.deb]
+    pin: {version: "3.46.1-7+deb13u2", sha256: 0a459adaffd901109f7811ab65f58e7a957b4907d05539cf3d1184efdcde0468, size: 914584}
+    licence: blessing
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libsqlite3-dev-amd64
+    type: deb
+    package: libsqlite3-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/82f8442c90cbfd6059d15e5db545bd0d4e878f3b
+    mirrors: [https://deb.debian.org/debian/pool/main/s/sqlite3/libsqlite3-dev_3.46.1-7+deb13u2_amd64.deb]
+    pin: {version: "3.46.1-7+deb13u2", sha256: 56e1945d52292b506c1f0bcb77543fea289ccee857c478dcddded40226e1594d, size: 1109400}
+    licence: blessing
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libssl-dev-amd64
+    type: deb
+    package: libssl-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/a65d99c4a03eeac87e01bb916bbd254bf7848dcf
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/libssl-dev_3.5.7-1~deb13u2_amd64.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: f245b646a4fe5beb31d6a387da9db3399e3b14a904efef1a23227ff5465a1d11, size: 2964784}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libssl3t64-amd64
+    type: deb
+    package: libssl3t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/8a2c262e9de449cc7b5f444865b52e6f3e202290
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/libssl3t64_3.5.7-1~deb13u2_amd64.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: 916f7f40b34a06e6ebfaefcdab331bff458328411da672598f126a760472467d, size: 2453872}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libstdc++-14-dev-amd64
+    type: deb
+    package: libstdc++-14-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/cece15016d9bd18e9069e361ef1381a8a6667382
+    mirrors: [https://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-19_amd64.deb]
+    pin: {version: "14.2.0-19", sha256: 4b962fac5f1af0bd8b1b3f97e0f47b9d8e9a79e88802143f00ebfbd78ad87a7b, size: 2375760}
+    licence: GPL-3.0-or-later WITH GCC-exception-3.1
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libtbb12-amd64
+    type: deb
+    package: libtbb12
+    arch: amd64
+    url: https://snapshot.debian.org/file/79efe9fb8fb825dc7d99db03f9ecabfacb4ef90e
+    mirrors: [https://deb.debian.org/debian/pool/main/o/onetbb/libtbb12_2022.1.0-1+deb13u1_amd64.deb]
+    pin: {version: "2022.1.0-1+deb13u1", sha256: 37378f4e8bae165a645d7112799c33b331f4ef077876eedd19c3ad67206cba8f, size: 91928}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libtorrent-rasterbar2.0t64-amd64
+    type: deb
+    package: libtorrent-rasterbar2.0t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/4a45f923f2fc436797467594f588a9da2fcbb562
+    mirrors: [https://deb.debian.org/debian/pool/main/libt/libtorrent-rasterbar/libtorrent-rasterbar2.0t64_2.0.11-1_amd64.deb]
+    pin: {version: "2.0.11-1", sha256: 5871a407e756af9436e66bab3f52617fe2669db5da799b5980d180cbccc1118a, size: 1671912}
+    licence: BSD-3-Clause
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libuv1-dev-amd64
+    type: deb
+    package: libuv1-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/9ba05abb2fa2429a4863b97ccdb5cd6fdab1c44e
+    mirrors: [https://deb.debian.org/debian/pool/main/libu/libuv1/libuv1-dev_1.50.0-2_amd64.deb]
+    pin: {version: "1.50.0-2", sha256: a638490607f08b4369b2515c013ced6b33dabecbf985b0a1629d4ad53ec9c9d2, size: 189372}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libxerces-c3.2t64-amd64
+    type: deb
+    package: libxerces-c3.2t64
+    arch: amd64
+    url: https://snapshot.debian.org/file/5f97f839d6e0112693152225a72a276db6ea257a
+    mirrors: [https://deb.debian.org/debian/pool/main/x/xerces-c/libxerces-c3.2t64_3.2.4+debian-1.3+b2_amd64.deb]
+    pin: {version: "3.2.4+debian-1.3+b2", sha256: 3dd7d060f116d9396f087d6c4e26d0f8a549e596e5e0845e10ed686a900e2033, size: 898032}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libxml2-amd64
+    type: deb
+    package: libxml2
+    arch: amd64
+    url: https://snapshot.debian.org/file/1004cd76d8bbb2b8603eaf4ac38670d6b1b79928
+    mirrors: [https://deb.debian.org/debian/pool/main/libx/libxml2/libxml2_2.12.7+dfsg+really2.9.14-2.1+deb13u3_amd64.deb]
+    pin: {version: "2.12.7+dfsg+really2.9.14-2.1+deb13u3", sha256: e0c6b63ce4602a036a526f60fe5e6c1586710688058d98fc1001b9b3147b7efd, size: 699724}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libxml2-dev-amd64
+    type: deb
+    package: libxml2-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/cb78895d351a518eb44a699eedfb91e6108f055e
+    mirrors: [https://deb.debian.org/debian/pool/main/libx/libxml2/libxml2-dev_2.12.7+dfsg+really2.9.14-2.1+deb13u3_amd64.deb]
+    pin: {version: "2.12.7+dfsg+really2.9.14-2.1+deb13u3", sha256: 2d1a5825cabb43cf4be6848a4acc4a73c50d9c3740ab0c76e2fed80a3e5c6398, size: 794724}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libyaml-cpp0.8-amd64
+    type: deb
+    package: libyaml-cpp0.8
+    arch: amd64
+    url: https://snapshot.debian.org/file/16e49132713b586cad40d6192b88d7aac0af8522
+    mirrors: [https://deb.debian.org/debian/pool/main/y/yaml-cpp/libyaml-cpp0.8_0.8.0+dfsg-7_amd64.deb]
+    pin: {version: "0.8.0+dfsg-7", sha256: 120ef7f4d076f3307d374133154e34106817be874323e8bc2814130d3dccbb8a, size: 132660}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libyaml-dev-amd64
+    type: deb
+    package: libyaml-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/68a18a116eca08caae8c9938e42a2c1e6fc4e526
+    mirrors: [https://deb.debian.org/debian/pool/main/liby/libyaml/libyaml-dev_0.2.5-2_amd64.deb]
+    pin: {version: "0.2.5-2", sha256: 4fb387d7b81dfe85dff67e371c0d77ee024a9aad921c368bcfc91c3b4b70a145, size: 63380}
+    licence: MIT
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libzstd-dev-amd64
+    type: deb
+    package: libzstd-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/d4d9826409b4f834f9f354b9156cf22c2288595d
+    mirrors: [https://deb.debian.org/debian/pool/main/libz/libzstd/libzstd-dev_1.5.7+dfsg-1_amd64.deb]
+    pin: {version: "1.5.7+dfsg-1", sha256: de5f8aabcf4cb5cd1b441495ea4c24838e88ecbb30ae22c032a1b3b68a9d6f1e, size: 371112}
+    licence: BSD-3-Clause OR GPL-2.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-openssh-client-amd64
+    type: deb
+    package: openssh-client
+    arch: amd64
+    url: https://snapshot.debian.org/file/709e2f6d3d83445285e5ae02d89695c644dcb6e7
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssh/openssh-client_10.0p1-7+deb13u4_amd64.deb]
+    pin: {version: "1:10.0p1-7+deb13u4", sha256: 8fff343654f86c3b3266f94cd338c7b4da2e386da029327815118ea00bce03b9, size: 989904}
+    licence: SSH-OpenSSH
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-openssh-server-amd64
+    type: deb
+    package: openssh-server
+    arch: amd64
+    url: https://snapshot.debian.org/file/285796817a5bbd0a69465876cf7dec2f367d9f27
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssh/openssh-server_10.0p1-7+deb13u4_amd64.deb]
+    pin: {version: "1:10.0p1-7+deb13u4", sha256: b4a02524fd2be375624d917ee8102a16567e9e8dd786b41c35e22360cdd37f9d, size: 602372}
+    licence: SSH-OpenSSH
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-openssl-amd64
+    type: deb
+    package: openssl
+    arch: amd64
+    url: https://snapshot.debian.org/file/6d4bae935f8e24b3cc0f65b9161150239a8a40ca
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/openssl_3.5.7-1~deb13u2_amd64.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: 4ff006f431d8c2e69fa736885a3b6e779f2448535f69dbde821d9f0ff87ad8ea, size: 1507300}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-procps-amd64
+    type: deb
+    package: procps
+    arch: amd64
+    url: https://snapshot.debian.org/file/cdbd731553617765ebc9c3caecd0d8b730c692f6
+    mirrors: [https://deb.debian.org/debian/pool/main/p/procps/procps_4.0.4-9_amd64.deb]
+    pin: {version: "2:4.0.4-9", sha256: 4db90bb6776772fc52585d6b1fbfc52ec2a85480e1b4363b743fbb2ffa2a5375, size: 882088}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-python3.13-minimal-amd64
+    type: deb
+    package: python3.13-minimal
+    arch: amd64
+    url: https://snapshot.debian.org/file/0f40ed62682a75e831ace51a76884e8b531688ad
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13-minimal_3.13.5-2+deb13u5_amd64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: a4aa6a9a8c77f87bfe545e1d14ec42c001d189ace90e3aa75deec882b39dee49, size: 2224552}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-rsync-amd64
+    type: deb
+    package: rsync
+    arch: amd64
+    url: https://snapshot.debian.org/file/797cccca95b53521ac509b235ed402b6aedfe92d
+    mirrors: [https://deb.debian.org/debian/pool/main/r/rsync/rsync_3.4.1+ds1-5+deb13u4_amd64.deb]
+    pin: {version: "3.4.1+ds1-5+deb13u4", sha256: 8aa122f6ba8d2ff112c72bb9814ee096ee516f0213b36b98bbe79c83c92fb226, size: 432964}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-sed-amd64
+    type: deb
+    package: sed
+    arch: amd64
+    url: https://snapshot.debian.org/file/6656c2b8b369f80b2c1b6bb86c058b4bdf4d608d
+    mirrors: [https://deb.debian.org/debian/pool/main/s/sed/sed_4.9-2+deb13u1_amd64.deb]
+    pin: {version: "4.9-2+deb13u1", sha256: 7071270ed4f6adda55bc4f926347fb847bacaffbdee3dff917bc6006ed7e3775, size: 330696}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-sqlite3-amd64
+    type: deb
+    package: sqlite3
+    arch: amd64
+    url: https://snapshot.debian.org/file/b2b9f6855bf56d559bc2e126655eed47f8705d91
+    mirrors: [https://deb.debian.org/debian/pool/main/s/sqlite3/sqlite3_3.46.1-7+deb13u2_amd64.deb]
+    pin: {version: "3.46.1-7+deb13u2", sha256: 877b00bd5ab6a3792fdffebd4aeebe0b8178df3c21f0e06f6a3c5186f7a799d9, size: 384144}
+    licence: blessing
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-tar-amd64
+    type: deb
+    package: tar
+    arch: amd64
+    url: https://snapshot.debian.org/file/24a3a22da8a3c894ae31e2e72538d2d3d28e7790
+    mirrors: [https://deb.debian.org/debian/pool/main/t/tar/tar_1.35+dfsg-3.1_amd64.deb]
+    pin: {version: "1.35+dfsg-3.1", sha256: 214c02e1aa291076a3147b8a4c4cae02fadf4c67df629186e3e313726faef1de, size: 814968}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-tmux-amd64
+    type: deb
+    package: tmux
+    arch: amd64
+    url: https://snapshot.debian.org/file/d60809fd0c8cba4d409910028853b671ed8aadaf
+    mirrors: [https://deb.debian.org/debian/pool/main/t/tmux/tmux_3.5a-3_amd64.deb]
+    pin: {version: "3.5a-3", sha256: e6b6aa51780044e2c4a0e618c33f832b70ec80caa30303e6c254a0c851b5af78, size: 490296}
+    licence: ISC
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-util-linux-amd64
+    type: deb
+    package: util-linux
+    arch: amd64
+    url: https://snapshot.debian.org/file/310b0e0292ec411af1e8f7fdfe0f1b4822a2e1d9
+    mirrors: [https://deb.debian.org/debian/pool/main/u/util-linux/util-linux_2.41.5-0+deb13u1_amd64.deb]
+    pin: {version: "2.41.5-0+deb13u1", sha256: 7d5b1176cc3d8cc6b290b3ec17af458f362d9200845f30da22057a8198744430, size: 1242392}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-wget-amd64
+    type: deb
+    package: wget
+    arch: amd64
+    url: https://snapshot.debian.org/file/3d0fb7c6536d3ba7860f0ab80b261107795ed9e4
+    mirrors: [https://deb.debian.org/debian/pool/main/w/wget/wget_1.25.0-2_amd64.deb]
+    pin: {version: "1.25.0-2", sha256: 5649cad63c781b2dcf5a7b87d70b3bf789291cd0d6bcabc4d521211f94980683, size: 984500}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-xz-utils-amd64
+    type: deb
+    package: xz-utils
+    arch: amd64
+    url: https://snapshot.debian.org/file/4979f0e9421eff39878d78d09c701f082e3a4685
+    mirrors: [https://deb.debian.org/debian/pool/main/x/xz-utils/xz-utils_5.8.1-1+deb13u1_amd64.deb]
+    pin: {version: "5.8.1-1+deb13u1", sha256: 9e0a39d95373afdaad3c9dfaab3c8b0beb9a2c4654e6be10b4bcf458509a3217, size: 659488}
+    licence: 0BSD
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-zlib1g-dev-amd64
+    type: deb
+    package: zlib1g-dev
+    arch: amd64
+    url: https://snapshot.debian.org/file/e0df83113384442c8973fe35be13326370c99fd8
+    mirrors: [https://deb.debian.org/debian/pool/main/z/zlib/zlib1g-dev_1.3.dfsg+really1.3.1-1+b1_amd64.deb]
+    pin: {version: "1:1.3.dfsg+really1.3.1-1+b1", sha256: 76ed5c858e1aef38b7be93acce5910e457e77bd6271471b9d05fb42e78826224, size: 919744}
+    licence: Zlib
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-zsh-amd64
+    type: deb
+    package: zsh
+    arch: amd64
+    url: https://snapshot.debian.org/file/b321bac1b497798bbd87abbc7f7a0222a648bd91
+    mirrors: [https://deb.debian.org/debian/pool/main/z/zsh/zsh_5.9-8+b24_amd64.deb]
+    pin: {version: "5.9-8+b24", sha256: 69791a2e667258a54449cfa01ad0d8d198a4c6e27f02f21c864d0545efe18966, size: 914732}
+    licence: LicenseRef-Zsh
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-zstd-amd64
+    type: deb
+    package: zstd
+    arch: amd64
+    url: https://snapshot.debian.org/file/68018e28d4afac4567e7ef0b4b86aa8cd888734d
+    mirrors: [https://deb.debian.org/debian/pool/main/libz/libzstd/zstd_1.5.7+dfsg-1_amd64.deb]
+    pin: {version: "1.5.7+dfsg-1", sha256: 6da09b6aad171ef9b50d6a2bb4c62f756b3561aac5e05b452b80516223e5e0f5, size: 756244}
+    licence: BSD-3-Clause OR GPL-2.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-firmware-ath9k-htc-all
+    type: deb
+    package: firmware-ath9k-htc
+    arch: all
+    url: https://snapshot.debian.org/file/251c2ae86610b05721ae330dc0a24e438f886339
+    mirrors: [https://deb.debian.org/debian/pool/main/o/open-ath9k-htc-firmware/firmware-ath9k-htc_1.4.0-110-ge888634+dfsg1-0.1_all.deb]
+    pin: {version: "1.4.0-110-ge888634+dfsg1-0.1", sha256: f001b88b89b8a89f10ecc2fb8d941f59a86cfc690eeeb1f073d85b70d1b303c4, size: 45040}
+    licence: BSD-3-Clause-Clear
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-ipxe-qemu-all
+    type: deb
+    package: ipxe-qemu
+    arch: all
+    url: https://snapshot.debian.org/file/ac9ede85f123b56f10532d1ae04f723e33203e2c
+    mirrors: [https://deb.debian.org/debian/pool/main/i/ipxe/ipxe-qemu_1.21.1+git20250501.dad20602+dfsg-1_all.deb]
+    pin: {version: "1.21.1+git20250501.dad20602+dfsg-1", sha256: b3b799d90b87ef2d6defa925cd48cf1691a19806f08041733a4f884d4a218b17, size: 1225404}
+    licence: GPL-2.0-or-later
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-opensbi-all
+    type: deb
+    package: opensbi
+    arch: all
+    url: https://snapshot.debian.org/file/ff3daf53d2e382f5640b2cd2a36e3149ae61e6a9
+    mirrors: [https://deb.debian.org/debian/pool/main/o/opensbi/opensbi_1.6-1_all.deb]
+    pin: {version: "1.6-1", sha256: dc4a43bd21a0ca11771ed8b19ee6fa8476d1d0f4976bd0b27c0357c699d27e1e, size: 204072}
+    licence: BSD-2-Clause
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-ovmf-all
+    type: deb
+    package: ovmf
+    arch: all
+    url: https://snapshot.debian.org/file/e22ebb3da0cbf61fb9b0fefa2d7f79d08c878885
+    mirrors: [https://deb.debian.org/debian/pool/main/e/edk2/ovmf_2025.02-8+deb13u1_all.deb]
+    pin: {version: "2025.02-8+deb13u1", sha256: 78e0d54df11fc77406cb7a0bc9a39e5bca6d1cbe06556b91d9a73491c52decdf, size: 5779964}
+    licence: BSD-2-Clause-Patent
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-qemu-system-data-all
+    type: deb
+    package: qemu-system-data
+    arch: all
+    url: https://snapshot.debian.org/file/530050e48fcbbbc9e4c0f62fbfaebbbbde7e3f4f
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qemu/qemu-system-data_10.0.13+ds-0+deb13u1_all.deb]
+    pin: {version: "1:10.0.13+ds-0+deb13u1", sha256: a0e03c526cc09d4c2ab20aa19a8c12e916cdc49a170acb16a6563c28f70eafd3, size: 2144176}
+    licence: GPL-2.0-or-later AND LGPL-2.1-or-later
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-seabios-all
+    type: deb
+    package: seabios
+    arch: all
+    url: https://snapshot.debian.org/file/38372e3bd0b3f34d7a90e1f7daa7243eb7800e77
+    mirrors: [https://deb.debian.org/debian/pool/main/s/seabios/seabios_1.16.3-2_all.deb]
+    pin: {version: "1.16.3-2", sha256: 2b590534250b940f43222eeab9a8f57f337a9d9a73fc412a43ab8cd07a7e56f6, size: 163272}
+    licence: LGPL-3.0-or-later
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-u-boot-qemu-all
+    type: deb
+    package: u-boot-qemu
+    arch: all
+    url: https://snapshot.debian.org/file/00c01b38c4f68ee57e9042d41a71818297fe6d51
+    mirrors: [https://deb.debian.org/debian/pool/main/u/u-boot/u-boot-qemu_2025.01-3+deb13u1_all.deb]
+    pin: {version: "2025.01-3+deb13u1", sha256: a3751b5d36a411457b2e7a2834cdce0e5d40493e6588a65d51c5603740a0c71c, size: 2330704}
+    licence: GPL-2.0-or-later
+    group: firmware
+    take: {members: ["usr/share/**/*.bin", "usr/share/**/*.rom", "usr/share/**/*.fd", "usr/lib/firmware/**", "usr/lib/u-boot/**/*.bin", "usr/lib/riscv64-linux-gnu/opensbi/**/*.bin"]}
+  - id: deb-bash-arm64
+    type: deb
+    package: bash
+    arch: arm64
+    url: https://snapshot.debian.org/file/df3fa9e0c7b344615f1a06c4281157f08efb9900
+    mirrors: [https://deb.debian.org/debian/pool/main/b/bash/bash_5.2.37-2+b10_arm64.deb]
+    pin: {version: "5.2.37-2+b10", sha256: 9e2d2b3646b250f53be79b6128d9cff5e99cc5ff4a8c84e58efab59ad9bb0ddc, size: 1456340}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-coreutils-arm64
+    type: deb
+    package: coreutils
+    arch: arm64
+    url: https://snapshot.debian.org/file/907c52e0edf6a3c94f256c547e0bbb78fb97caa5
+    mirrors: [https://deb.debian.org/debian/pool/main/c/coreutils/coreutils_9.7-3_arm64.deb]
+    pin: {version: "9.7-3", sha256: 99b2531e8d16e4f2d3f239ae3cb57913ec1f43764d2d6cd5c69154cbb1e57f3e, size: 2948764}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libc6-arm64
+    type: deb
+    package: libc6
+    arch: arm64
+    url: https://snapshot.debian.org/file/6ee536e6a461ca319776fac983202946f4d3dce8
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.41-12+deb13u4_arm64.deb]
+    pin: {version: "2.41-12+deb13u4", sha256: 8784eda966b189c777a384dac5ce009e8fc9b52d006926c5a013e7fa8aa688cc, size: 2483572}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/lib/**", "usr/bin/*", "usr/sbin/*"], exclude: ["**/libc.so.6"]}
+  - id: deb-libpython3.13-stdlib-arm64
+    type: deb
+    package: libpython3.13-stdlib
+    arch: arm64
+    url: https://snapshot.debian.org/file/35cc8669f33410e90648c1dee9ed1395920b9b9e
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13-stdlib_3.13.5-2+deb13u5_arm64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: d1178d24e4d143cc6c577d9dc0f26dd982efccc2e600d25ce86361f168a22be0, size: 1894712}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libqt6core6t64-arm64
+    type: deb
+    package: libqt6core6t64
+    arch: arm64
+    url: https://snapshot.debian.org/file/18d6c3ee65c786e63ec70235f7a73601445ed459
+    mirrors: [https://deb.debian.org/debian/pool/main/q/qt6-base/libqt6core6t64_6.8.2+dfsg-9+deb13u2_arm64.deb]
+    pin: {version: "6.8.2+dfsg-9+deb13u2", sha256: 9a357f28ace917f65d114aaa26aed4ee67e2858797f0a2d01130f299350df208, size: 1680380}
+    licence: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libssl3t64-arm64
+    type: deb
+    package: libssl3t64
+    arch: arm64
+    url: https://snapshot.debian.org/file/0fe8373a670506d7e7633d3ddfc9a4f3f58bfe49
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/libssl3t64_3.5.7-1~deb13u2_arm64.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: ec131326aa9fa9ec934eca386bc7991f328fe383eaefd3e43bd8901a9199c5ae, size: 2766020}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-openssl-arm64
+    type: deb
+    package: openssl
+    arch: arm64
+    url: https://snapshot.debian.org/file/48255d561e232412f617f022dc3f7998095e4925
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/openssl_3.5.7-1~deb13u2_arm64.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: ff38f9e4fdbfef72d9cb31088e5e42f58c83c2fb1d1bbb4e4b4c9adc53c17100, size: 1472236}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-python3.13-minimal-arm64
+    type: deb
+    package: python3.13-minimal
+    arch: arm64
+    url: https://snapshot.debian.org/file/788c5a742e3a4db481410cd5d6833408b4081a43
+    mirrors: [https://deb.debian.org/debian/pool/main/p/python3.13/libpython3.13-minimal_3.13.5-2+deb13u5_arm64.deb]
+    pin: {version: "3.13.5-2+deb13u5", sha256: 3655ef258b19142cf6fe38ef89731d5c630b2cf3309632494a720b28c1cfcd85, size: 2008016}
+    licence: PSF-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-util-linux-arm64
+    type: deb
+    package: util-linux
+    arch: arm64
+    url: https://snapshot.debian.org/file/a7ca71bf68400014fba5fb8ca927fa075b76ce1c
+    mirrors: [https://deb.debian.org/debian/pool/main/u/util-linux/util-linux_2.41.5-0+deb13u1_arm64.deb]
+    pin: {version: "2.41.5-0+deb13u1", sha256: d427f83a08d46107e8f7d39f1522a8a316e785e45f04ad657d2ecb7570210d84, size: 1199468}
+    licence: GPL-2.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-bash-armhf
+    type: deb
+    package: bash
+    arch: armhf
+    url: https://snapshot.debian.org/file/46be89656ee5590c65e7be47ccf74d08e4820d8f
+    mirrors: [https://deb.debian.org/debian/pool/main/b/bash/bash_5.2.37-2+b10_armhf.deb]
+    pin: {version: "5.2.37-2+b10", sha256: 6c5083dc7361f6d162186d1290f66cf597069f4aeb5cb95798fc1d125dc67c6d, size: 1433836}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-coreutils-armhf
+    type: deb
+    package: coreutils
+    arch: armhf
+    url: https://snapshot.debian.org/file/0eb9444c27e4f0230fc32fd58826900378f913e5
+    mirrors: [https://deb.debian.org/debian/pool/main/c/coreutils/coreutils_9.7-3_armhf.deb]
+    pin: {version: "9.7-3", sha256: 6df222dd53265e43122806fe23194f0c75ef2367ca63fb40b3e1853285675f46, size: 2868896}
+    licence: GPL-3.0-or-later
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  - id: deb-libc6-armhf
+    type: deb
+    package: libc6
+    arch: armhf
+    url: https://snapshot.debian.org/file/1b8141d006d6e635a51a46fa878bcdfb8c54c5d4
+    mirrors: [https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.41-12+deb13u4_armhf.deb]
+    pin: {version: "2.41-12+deb13u4", sha256: 4fc6fed8d77d01c0dacb5fda8b880a8c8a669575936de5761b693077a6f6c2ec, size: 2260832}
+    licence: LGPL-2.1-or-later
+    take: {members: ["usr/lib/**", "usr/bin/*", "usr/sbin/*"], exclude: ["**/libc.so.6"]}
+  - id: deb-libssl3t64-armhf
+    type: deb
+    package: libssl3t64
+    arch: armhf
+    url: https://snapshot.debian.org/file/ed7e76612224273685258d4d672a2c4541076f0a
+    mirrors: [https://deb.debian.org/debian/pool/main/o/openssl/libssl3t64_3.5.7-1~deb13u2_armhf.deb]
+    pin: {version: "3.5.7-1~deb13u2", sha256: 94538529b1471c2055476df47fbc29a67a734c7c9d7f1fb44fd54c97e43c40c5, size: 1999964}
+    licence: Apache-2.0
+    take: {members: ["usr/bin/*", "usr/sbin/*", "usr/lib/**", "usr/libexec/**"]}
+  # ---------------------------------------------------------------- PyPI wheels (ELF / PE / Mach-O extension modules)
+  - id: pypi-cryptography-linux-x86-64
+    type: pypi
+    package: cryptography
+    filename: cryptography-50.0.1-cp39-abi3-manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/d6/51/3f9701867a46b6c1740c9b52fc4d3bed6cbdcfedcc9b6e64305c07f39cff/cryptography-50.0.1-cp39-abi3-manylinux_2_28_x86_64.whl
+    pin: {version: "50.0.1", sha256: 407fe2b6db00939c05c0e945e9914238f2f0a430974839429dafc82b1ee6bee5, size: 4772942}
+    licence: Apache-2.0 OR BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-cryptography-linux-aarch64
+    type: pypi
+    package: cryptography
+    filename: cryptography-50.0.1-cp39-abi3-manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/27/3a/3c5f80daa4dcd47323c7af8a2fcb90de27a33564d4fcac69846c0972691a/cryptography-50.0.1-cp39-abi3-manylinux_2_28_aarch64.whl
+    pin: {version: "50.0.1", sha256: 4c4188f7c0cf655be5c06342b817ed0f9595b69ffa2b12026e5353eed29dea88, size: 4758474}
+    licence: Apache-2.0 OR BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-cryptography-win-amd64
+    type: pypi
+    package: cryptography
+    filename: cryptography-50.0.1-cp39-abi3-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/99/89/87ef49ffe383ef4e147d27b7bf2088fb0b54ea409dd87b5a89442e5828a5/cryptography-50.0.1-cp39-abi3-win_amd64.whl
+    pin: {version: "50.0.1", sha256: 55d16b1ef3ee0958d893a977b19777887e546c9954ea81b200c3301a864013f2, size: 3875429}
+    licence: Apache-2.0 OR BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-cryptography-mac-arm64
+    type: pypi
+    package: cryptography
+    filename: cryptography-50.0.1-cp39-abi3-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/84/a9/ee16a903f13755e914d1eecc482fe64d1f10761c3960e5d8fa6837377aff/cryptography-50.0.1-cp39-abi3-macosx_11_0_arm64.whl
+    pin: {version: "50.0.1", sha256: ca83d00d9e69cd5eb63f2e69c3a5a59e0cecae5ae14c6ae0b35830fe3b37bad0, size: 4035307}
+    licence: Apache-2.0 OR BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-duckdb-linux-x86-64
+    type: pypi
+    package: duckdb
+    filename: duckdb-1.5.5-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/3e/c5/41bef391fb8b23dbc133c9f2ba016e7a7a8124513d2cc1b430f1897d87e4/duckdb-1.5.5-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "1.5.5", sha256: 078e6a60dd8eedde5832f45422ca5c4a6b8c837aeabd8a56ca0b7d933f588053, size: 21511060}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-duckdb-win-amd64
+    type: pypi
+    package: duckdb
+    filename: duckdb-1.5.5-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/07/9f/c44dfc1f924ac29b3252dc1b91393c01d009dbfe9f8ed33f10b986151bd1/duckdb-1.5.5-cp313-cp313-win_amd64.whl
+    pin: {version: "1.5.5", sha256: 6826504277dba513c0c5d71d828456c94d729c9d2482f94b2e289f90a9167e28, size: 13168028}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-duckdb-mac-arm64
+    type: pypi
+    package: duckdb
+    filename: duckdb-1.5.5-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/9f/a5/0a6f4fa60562faa615e55e15bd1953a2f2b17a8edd8105e5cda215e43457/duckdb-1.5.5-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "1.5.5", sha256: 49c963d9469373d7aba8d750d9ea565ab823e94166efed953f184dd9b169b98c, size: 15509136}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-grpcio-linux-x86-64
+    type: pypi
+    package: grpcio
+    filename: grpcio-1.84.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    url: https://files.pythonhosted.org/packages/da/56/548a643decb059ca244499c675ae2c13a15f523ba94592c2774bd80a13c1/grpcio-1.84.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    pin: {version: "1.84.0", sha256: 986e9751d416d7a6eaa2fecdac38da63153d63a4b340ba7d624889c490451500, size: 7159572}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-grpcio-linux-aarch64
+    type: pypi
+    package: grpcio
+    filename: grpcio-1.84.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    url: https://files.pythonhosted.org/packages/d3/50/00165b05cd73f45996748ea67ce9e55d08936f2fea94a7fd8541cc2d0e54/grpcio-1.84.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    pin: {version: "1.84.0", sha256: fff5ef3fe1bba7d6147e5f19e01e5e122ac2c076486887ddcb8d42e663400fbe, size: 6989458}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-grpcio-win-amd64
+    type: pypi
+    package: grpcio
+    filename: grpcio-1.84.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/d0/9a/1fa59ddbfc8898e5518d1447e46f771f387f0ed6132ad531395338e51a5c/grpcio-1.84.0-cp313-cp313-win_amd64.whl
+    pin: {version: "1.84.0", sha256: b61692f0069b3eee2fc8a3a1b7f6c044df9e03fede6ce69b3ca832e1c39f26c5, size: 5255326}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-grpcio-mac-universal2
+    type: pypi
+    package: grpcio
+    filename: grpcio-1.84.0-cp313-cp313-macosx_11_0_universal2.whl
+    url: https://files.pythonhosted.org/packages/c5/4b/ed8e22a1237e6b2be6ef4f221d074a5b0e0dd8a0da8c944c04aea731f0eb/grpcio-1.84.0-cp313-cp313-macosx_11_0_universal2.whl
+    pin: {version: "1.84.0", sha256: e41c3993eee896c617dbd8a505085d28b6e84a0445ed9a1f40f95808473cf678, size: 12336549}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-lxml-linux-x86-64
+    type: pypi
+    package: lxml
+    filename: lxml-6.1.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    url: https://files.pythonhosted.org/packages/ab/8d/8a7b91df0b54d09d25f5f44885d6b3e0a6d6643a8c070191580318d20c42/lxml-6.1.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    pin: {version: "6.1.3", sha256: b477912f42c5c33405a10c759d22f80cf5af043ae02d95b9d8e5e5bc555739ed, size: 5093324}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-lxml-linux-aarch64
+    type: pypi
+    package: lxml
+    filename: lxml-6.1.3-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    url: https://files.pythonhosted.org/packages/35/42/df27b56848acd29d8a720acc28977911aab36f2a09df4208d5502e887415/lxml-6.1.3-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    pin: {version: "6.1.3", sha256: 611a51e61c92f62345a50b0035df6fc0d678f9299f33728826d831598862f59d, size: 4936186}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-lxml-win-amd64
+    type: pypi
+    package: lxml
+    filename: lxml-6.1.3-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/c0/28/e46a7702bd95e9043291f7c3539b6184cba66f96cea9936f20939b284eeb/lxml-6.1.3-cp313-cp313-win_amd64.whl
+    pin: {version: "6.1.3", sha256: e477aca0bc0d19f3b4ae9e4f2a1cfd687c31bf772d78734910658186b40b2477, size: 4004091}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-lxml-win-arm64
+    type: pypi
+    package: lxml
+    filename: lxml-6.1.3-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/8a/1d/154c78e20479a43916e63f19cb720d83f44f024b03228be44c92d9a97b24/lxml-6.1.3-cp313-cp313-win_arm64.whl
+    pin: {version: "6.1.3", sha256: b1cc980905221a5d8b3c476330730b3adb40ff80add71ffbdb6215ba055656f1, size: 3665468}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-lxml-mac-universal2
+    type: pypi
+    package: lxml
+    filename: lxml-6.1.3-cp313-cp313-macosx_10_13_universal2.whl
+    url: https://files.pythonhosted.org/packages/52/05/3ef45db776baea068044c799bbba68f3ca00a440c0e930a17c572f3d9639/lxml-6.1.3-cp313-cp313-macosx_10_13_universal2.whl
+    pin: {version: "6.1.3", sha256: 3a48093cdb058a93af842ede9703520e810b05dcd0fc6d7190a06376c3bfb6bd, size: 8590357}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-markupsafe-linux-x86-64
+    type: pypi
+    package: markupsafe
+    filename: markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/a9/21/9b05698b46f218fc0e118e1f8168395c65c8a2c750ae2bab54fc4bd4e0e8/markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "3.0.3", sha256: ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676, size: 22980}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-markupsafe-linux-aarch64
+    type: pypi
+    package: markupsafe
+    filename: markupsafe-3.0.3-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/00/07/575a68c754943058c78f30db02ee03a64b3c638586fba6a6dd56830b30a3/markupsafe-3.0.3-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "3.0.3", sha256: 133a43e73a802c5562be9bbcd03d090aa5a1fe899db609c29e8c8d815c5f6de6, size: 24374}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-markupsafe-win-amd64
+    type: pypi
+    package: markupsafe
+    filename: markupsafe-3.0.3-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/05/73/c4abe620b841b6b791f2edc248f556900667a5a1cf023a6646967ae98335/markupsafe-3.0.3-cp313-cp313-win_amd64.whl
+    pin: {version: "3.0.3", sha256: 9a1abfdc021a164803f4d485104931fb8f8c1efd55bc6b748d2f5774e78b62c5, size: 15113}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-markupsafe-win-arm64
+    type: pypi
+    package: markupsafe
+    filename: markupsafe-3.0.3-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/f0/3a/fa34a0f7cfef23cf9500d68cb7c32dd64ffd58a12b09225fb03dd37d5b80/markupsafe-3.0.3-cp313-cp313-win_arm64.whl
+    pin: {version: "3.0.3", sha256: 7e68f88e5b8799aa49c85cd116c932a1ac15caaa3f5db09087854d218359e485, size: 13911}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-markupsafe-mac-arm64
+    type: pypi
+    package: markupsafe
+    filename: markupsafe-3.0.3-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/9c/d9/5f7756922cdd676869eca1c4e3c0cd0df60ed30199ffd775e319089cb3ed/markupsafe-3.0.3-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "3.0.3", sha256: 116bb52f642a37c115f517494ea5feb03889e04df47eeff5b130b1808ce7c219, size: 12029}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-msgpack-linux-x86-64
+    type: pypi
+    package: msgpack
+    filename: msgpack-1.2.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/6e/d3/6592e4064619b04f2dd0054c5fa13e37e3d55eb26044483d871fadb2f46b/msgpack-1.2.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "1.2.2", sha256: d24b38a825bcca41bb956de50eb98451ef291304a8607fad99e619043d3e79b9, size: 417332}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-msgpack-linux-aarch64
+    type: pypi
+    package: msgpack
+    filename: msgpack-1.2.2-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/d7/75/35823e4419df8792191b2a17ae3fe71b41d02c162b2c491c94d1a87f0caa/msgpack-1.2.2-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "1.2.2", sha256: 1814f92306ae7862908e9ece7cfd90e0dc87ded3e89b6ae7ffdd1175d6376fdc, size: 405635}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-msgpack-win-amd64
+    type: pypi
+    package: msgpack
+    filename: msgpack-1.2.2-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/3c/f8/593f5caf0dacab41cde1564c5f0419e61af55ec9628006205e8fd5eb5e03/msgpack-1.2.2-cp313-cp313-win_amd64.whl
+    pin: {version: "1.2.2", sha256: b07c03f0da7e5279170df7745ddc732d526c8a198208936ec1a95c11ed2b2d5f, size: 72203}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-msgpack-win-arm64
+    type: pypi
+    package: msgpack
+    filename: msgpack-1.2.2-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/bc/9e/c6ef92046b4a2bbb9d3aa0cb581cbf4a4051afccf6e5fb301a1bd3086f39/msgpack-1.2.2-cp313-cp313-win_arm64.whl
+    pin: {version: "1.2.2", sha256: d13d07efbf655f9ae7a2352b630c52727b359005b21ba08a507585c9ac8c0896, size: 65435}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-msgpack-mac-arm64
+    type: pypi
+    package: msgpack
+    filename: msgpack-1.2.2-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/33/54/10c6c16ddba8a5112e3680176b838e3694e4aad7284f9daa6d6d70d98817/msgpack-1.2.2-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "1.2.2", sha256: 1e8cdd1f3e7cc52c751092a9bf740e81e6919ab109cd376ae2d965dad0bbae34, size: 83734}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-onnxruntime-linux-x86-64
+    type: pypi
+    package: onnxruntime
+    filename: onnxruntime-1.30.0-cp313-cp313-manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/f1/a1/ede48ab5dc54907a2999362777f541e132639fb06628ded1932058aa8a36/onnxruntime-1.30.0-cp313-cp313-manylinux_2_28_x86_64.whl
+    pin: {version: "1.30.0", sha256: 86f940afc801ea9681a4da8af84fbe95e1d9ea7d80903952cc1bfad54faad38f, size: 23585560}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-onnxruntime-win-amd64
+    type: pypi
+    package: onnxruntime
+    filename: onnxruntime-1.30.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/3c/dd/c57c529dbc6dd55eca24b12cfbeab1b6a690de72083824eca689085f55b0/onnxruntime-1.30.0-cp313-cp313-win_amd64.whl
+    pin: {version: "1.30.0", sha256: 4b63041bd623a9a9ac5e353948436c6fa7f43edd12d6b4a4ebc340bca959ba93, size: 14311378}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-onnxruntime-mac-arm64
+    type: pypi
+    package: onnxruntime
+    filename: onnxruntime-1.30.0-cp313-cp313-macosx_14_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/f0/75/508454c5d01f31641dabc597fe559594c931a520a2673031179319d0afd8/onnxruntime-1.30.0-cp313-cp313-macosx_14_0_arm64.whl
+    pin: {version: "1.30.0", sha256: 05e4fc41711d1f4abd19a9124b5be7a65a506cb2670a7f14b16162ef13c58134, size: 21544990}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-opencv-python-headless-linux-x86-64
+    type: pypi
+    package: opencv-python-headless
+    filename: opencv_python_headless-5.0.0.93-cp37-abi3-manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/9b/21/f6ef335f6e65724aa78b8d792b48d40a48c381715f1e62f5a5049e09d07e/opencv_python_headless-5.0.0.93-cp37-abi3-manylinux_2_28_x86_64.whl
+    pin: {version: "5.0.0.93", sha256: ed709fdf9aa0bd1f2ed8549e71d19449b03a675bb581eb292285f6861953be37, size: 61204038}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-opencv-python-headless-win-amd64
+    type: pypi
+    package: opencv-python-headless
+    filename: opencv_python_headless-5.0.0.93-cp37-abi3-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/b8/88/763b967f7efd7226b82c9fae16d560cba049b1f0c036647e65c610fd636e/opencv_python_headless-5.0.0.93-cp37-abi3-win_amd64.whl
+    pin: {version: "5.0.0.93", sha256: 829717b6a95554f273e49e357cee3b3a2a26b6f4842fbc1bed2b45bdd8f87e0e, size: 43825962}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-opencv-python-headless-mac-arm64
+    type: pypi
+    package: opencv-python-headless
+    filename: opencv_python_headless-5.0.0.93-cp37-abi3-macosx_13_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/53/7c/8c8097891c509d98cd128493835c95631c80be6a8f37ed9d25716c2e16f1/opencv_python_headless-5.0.0.93-cp37-abi3-macosx_13_0_arm64.whl
+    pin: {version: "5.0.0.93", sha256: 030ca5e0837a2963ab36ef896baa9767eb8d2b83353fb28af5a521e40dd8756f, size: 48322581}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-orjson-linux-x86-64
+    type: pypi
+    package: orjson
+    filename: orjson-3.12.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    url: https://files.pythonhosted.org/packages/bc/74/89bb236deb9565f99434b13052bb40ddfcce4adf3afbfa3132ee7e421468/orjson-3.12.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    pin: {version: "3.12.0", sha256: 1c680706fc8396d95e7c4c1f9482563f552137aef91b57237a3ad5aaf64629df, size: 131075}
+    licence: MPL-2.0 AND (Apache-2.0 OR MIT)
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-orjson-linux-aarch64
+    type: pypi
+    package: orjson
+    filename: orjson-3.12.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    url: https://files.pythonhosted.org/packages/7d/40/094cc53126a3d22f76cdf83b6ea67338bed01d774037621a785aa8e6e5ea/orjson-3.12.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    pin: {version: "3.12.0", sha256: 784106539f4b9d4b930e0b4eb8d45168507dae001945e71b4675a367f1e5e806, size: 130528}
+    licence: MPL-2.0 AND (Apache-2.0 OR MIT)
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-orjson-win-amd64
+    type: pypi
+    package: orjson
+    filename: orjson-3.12.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/52/87/69f98f8d40faff103a965a5fbb83f08241b01beaf92badb5413fbc9358cc/orjson-3.12.0-cp313-cp313-win_amd64.whl
+    pin: {version: "3.12.0", sha256: b85931be5b6763c31283805c9bdaae1ca03ad9f6f12a15f1cbf6745b907932c2, size: 121841}
+    licence: MPL-2.0 AND (Apache-2.0 OR MIT)
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-orjson-win-arm64
+    type: pypi
+    package: orjson
+    filename: orjson-3.12.0-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/e6/07/b83046a4e3cadcc0987d0f160696107c4af706a619b56e4ad01940cadadf/orjson-3.12.0-cp313-cp313-win_arm64.whl
+    pin: {version: "3.12.0", sha256: 6a31348d7dfa64cd9c78bd1f510ff44c48fe64d71094e6b90e364dba3b55949e, size: 126765}
+    licence: MPL-2.0 AND (Apache-2.0 OR MIT)
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-orjson-mac-arm64
+    type: pypi
+    package: orjson
+    filename: orjson-3.12.0-cp313-cp313-macosx_15_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/f8/4a/bc87c45e7ec639d35ebefd62618e01939531ac8e171426606a01bda05914/orjson-3.12.0-cp313-cp313-macosx_15_0_arm64.whl
+    pin: {version: "3.12.0", sha256: ad0422b92d5195443a39f80c3bcf731cc2e00f153bd32063a47b73b057bd0f03, size: 123662}
+    licence: MPL-2.0 AND (Apache-2.0 OR MIT)
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pillow-linux-x86-64
+    type: pypi
+    package: pillow
+    filename: pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/f7/62/de5bdd77d935331f4f802edc11e4d82950f642caad6cb2f949837b8560e2/pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "12.3.0", sha256: 0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3, size: 6937129}
+    licence: MIT-CMU
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pillow-linux-aarch64
+    type: pypi
+    package: pillow
+    filename: pillow-12.3.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/1f/01/e18aff37cb0b4aac47ac90f016d347a49aca667ef97f190b06ac2aabc928/pillow-12.3.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "12.3.0", sha256: f7401aebd7f581d7f83a439d87d474999317ee099218e5ad25d125290990ba65, size: 6263736}
+    licence: MIT-CMU
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pillow-win-amd64
+    type: pypi
+    package: pillow
+    filename: pillow-12.3.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/a6/9b/7a58e61d62be561da3a356fe2384d4059a6345fc130e23ef1c36a5b81d24/pillow-12.3.0-cp313-cp313-win_amd64.whl
+    pin: {version: "12.3.0", sha256: 1cca606cd25738df4ed873d5ad46bbdb3d83b5cbca291f6b4ff13a4df6b0bbe8, size: 7239691}
+    licence: MIT-CMU
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pillow-win-arm64
+    type: pypi
+    package: pillow
+    filename: pillow-12.3.0-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/aa/b0/c4ed4f0ef8f8fa5ee8351537db6650bb8189f7e118842978dd6589065692/pillow-12.3.0-cp313-cp313-win_arm64.whl
+    pin: {version: "12.3.0", sha256: b629de27fda84b42cde7edef0d85f13b958b47f6e9bbcbba9b673c562a89bd8b, size: 2568185}
+    licence: MIT-CMU
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pillow-mac-arm64
+    type: pypi
+    package: pillow
+    filename: pillow-12.3.0-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/10/76/8803c13605b763d33d156c4678fc77f8443389c0c51c8aef707bb02015f4/pillow-12.3.0-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "12.3.0", sha256: d69141514cc30b774ceea5e3ed3a6635c8d8a96edf664689b890f4089111fb35, size: 4780109}
+    licence: MIT-CMU
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-psycopg2-binary-linux-x86-64
+    type: pypi
+    package: psycopg2-binary
+    filename: psycopg2_binary-2.9.13-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    url: https://files.pythonhosted.org/packages/56/5c/87daea77c4132114d1a5da3a4928dd59446c3b3cc73d288cae08cf0b91a6/psycopg2_binary-2.9.13-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    pin: {version: "2.9.13", sha256: f04ada42bcd537adbaf8b7f3140237a204e452a88d0c1831cfce69f7d2e59f4e, size: 4282438}
+    licence: LGPL-3.0-or-later
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-psycopg2-binary-linux-aarch64
+    type: pypi
+    package: psycopg2-binary
+    filename: psycopg2_binary-2.9.13-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/91/e5/56f9efdc9337acbd1a75798d97163183b63a1babc17602f7163009506c96/psycopg2_binary-2.9.13-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "2.9.13", sha256: aa37089795bd9701576edc2eb5849ce77a439eda9dfdfa47857449332cfa5292, size: 5902064}
+    licence: LGPL-3.0-or-later
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-psycopg2-binary-win-amd64
+    type: pypi
+    package: psycopg2-binary
+    filename: psycopg2_binary-2.9.13-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/87/c2/0e0ffb4caeb651631cbc6c8ead83e2a16457750b1d2eb7f5ef111c1f4d36/psycopg2_binary-2.9.13-cp313-cp313-win_amd64.whl
+    pin: {version: "2.9.13", sha256: 691da68ae5dd7c3ac77514357d35ece7b1ba8b5f3e6c92735198aa6159c355c8, size: 2767914}
+    licence: LGPL-3.0-or-later
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-psycopg2-binary-mac-arm64
+    type: pypi
+    package: psycopg2-binary
+    filename: psycopg2_binary-2.9.13-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/b5/63/5a9633f4563a73beba69b20a846ddd14c1c6ac072f5e8aab0da97ffabc2a/psycopg2_binary-2.9.13-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "2.9.13", sha256: f818161d2302b3b3e9c75d5a1d0a5c5679e92e45cfec6432b9d5432dde5ff1f1, size: 3817976}
+    licence: LGPL-3.0-or-later
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyarrow-linux-x86-64
+    type: pypi
+    package: pyarrow
+    filename: pyarrow-25.0.1-cp313-cp313-manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/98/d6/33a411115b61dbfc16ad6ad73e71730f6fea654ee3667673bc53ab0e2fe7/pyarrow-25.0.1-cp313-cp313-manylinux_2_28_x86_64.whl
+    pin: {version: "25.0.1", sha256: 0befcf816e45a1af33ac775a9970b749e4868a230c7372f0ae5e932bee27039f, size: 50104452}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyarrow-win-amd64
+    type: pypi
+    package: pyarrow
+    filename: pyarrow-25.0.1-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/31/24/97e8bd98f1e3b07e2ba08bcdff690674fbe16d69a7d2712cc3884665e615/pyarrow-25.0.1-cp313-cp313-win_amd64.whl
+    pin: {version: "25.0.1", sha256: 31e49a7888fcdf3a835da33ae777f6bb9a866334e5a789282fc26dcf426f7f15, size: 27870159}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyarrow-mac-arm64
+    type: pypi
+    package: pyarrow
+    filename: pyarrow-25.0.1-cp313-cp313-macosx_12_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/cc/8d/8f271a7a034c834910ec925d56fa4b29733b1380f5289419f5aaa3b02777/pyarrow-25.0.1-cp313-cp313-macosx_12_0_arm64.whl
+    pin: {version: "25.0.1", sha256: c7c534ec03c358a76ea3e505e74c1b6aef290af90c444dfd092dbfe23e755b85, size: 35855328}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pydantic-core-linux-x86-64
+    type: pypi
+    package: pydantic-core
+    filename: pydantic_core-2.49.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    url: https://files.pythonhosted.org/packages/11/48/4f0ba347b15e1971c1ce5b048ef0df24f87a20eec45f96deddc784b25b2a/pydantic_core-2.49.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    pin: {version: "2.49.0", sha256: 60550432855bc323ce9aa813e14e0bf2b806de59727aab850a1c83c0fd7dc0c1, size: 2126710}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pydantic-core-linux-aarch64
+    type: pypi
+    package: pydantic-core
+    filename: pydantic_core-2.49.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    url: https://files.pythonhosted.org/packages/2e/f8/852096d493b446d37c1c0434b771ff829f14e9ceba96e39a16b14d0cbbbf/pydantic_core-2.49.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    pin: {version: "2.49.0", sha256: 52984e1335adb925c6089a44d167668a1f8cc6bbbca25657936e51922c0d07bc, size: 2005006}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pydantic-core-win-amd64
+    type: pypi
+    package: pydantic-core
+    filename: pydantic_core-2.49.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/ed/c1/31a54f336c4fe510d9fa8ad1f7aa1e7f83f5e0f634c0bb193d1527bc984d/pydantic_core-2.49.0-cp313-cp313-win_amd64.whl
+    pin: {version: "2.49.0", sha256: 92503a642b207cf9d085f4f79f9b66c972208262bb1b12bca95c3a0c6deddea3, size: 2126186}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pydantic-core-win-arm64
+    type: pypi
+    package: pydantic-core
+    filename: pydantic_core-2.49.0-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/30/98/8b158c8363df41aaa68953e96cae1f13fdff7713e61cb7c96d7c4486b97e/pydantic_core-2.49.0-cp313-cp313-win_arm64.whl
+    pin: {version: "2.49.0", sha256: f45ddfdf69dac79736c3365f4b73a5f849f488c427535bc426d685a6101c68ff, size: 2110960}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pydantic-core-mac-arm64
+    type: pypi
+    package: pydantic-core
+    filename: pydantic_core-2.49.0-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/9c/f8/34175751a5fc1ab120599415161c7fa5858283083b78e94391e3f08ad0b4/pydantic_core-2.49.0-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "2.49.0", sha256: c5e9b40518489f5bf6bf8e2cb4f2ea7ae935fb063c4d18d2593d52db136ed7b1, size: 1982334}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pywin32-win-amd64
+    type: pypi
+    package: pywin32
+    filename: pywin32-312-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/ba/db/36a78e3403099d31d9746d13fdcde5accc43c1155f375a34d15983a479a7/pywin32-312-cp313-cp313-win_amd64.whl
+    pin: {version: "312", sha256: c53e878d15a1c44788082bfe712a905433473aa38f86375b7cf8b45e3acbaaf9, size: 6914298}
+    licence: PSF-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pywin32-win-arm64
+    type: pypi
+    package: pywin32
+    filename: pywin32-312-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/84/37/c1697194092b76de9ed47ca124323f02c57ffc8a45c06f88a3d5acaf01eb/pywin32-312-cp313-cp313-win_arm64.whl
+    pin: {version: "312", sha256: 59aba5d5940842075343a5ddc6b11f1cdf0d1567fe745290359dfbcc7c2eb831, size: 6727640}
+    licence: PSF-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyzmq-linux-x86-64
+    type: pypi
+    package: pyzmq
+    filename: pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/62/2c/d5828306f795e8d34676d266823b74e2101e0ad3760d12083de3e02abbb2/pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "27.2.0", sha256: dea74fd65f1fc5f7fe167916a473ebe6ed6174e5e5d9de11ea6583661be6cf43, size: 872258}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyzmq-linux-aarch64
+    type: pypi
+    package: pyzmq
+    filename: pyzmq-27.2.0-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/b4/78/a3a3a86c2b00fadb92ece1ca4f8f028d62b2ce9ac3526097239ab2d6fba9/pyzmq-27.2.0-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "27.2.0", sha256: 1f8079d0521fe94bbb401fe9407578b28f3701627c8be2c9f7e0c5b77dcb0109, size: 697722}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyzmq-win-amd64
+    type: pypi
+    package: pyzmq
+    filename: pyzmq-27.2.0-cp312-abi3-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/02/8b/b83f7780dad22e0878e4c7bd9158ebd24ed12bc3d5e3a471cd0576f77ded/pyzmq-27.2.0-cp312-abi3-win_amd64.whl
+    pin: {version: "27.2.0", sha256: 2c218c6ab8bc447ba62054b581fd30209689d199c6ecb253f79615ca74a38e12, size: 628633}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyzmq-win-arm64
+    type: pypi
+    package: pyzmq
+    filename: pyzmq-27.2.0-cp312-abi3-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/52/aa/3918b5ac7f9987bd9c421b065074fd7409ded88f856f2c704a24341877ec/pyzmq-27.2.0-cp312-abi3-win_arm64.whl
+    pin: {version: "27.2.0", sha256: 348d6fd3e4b81ae4580622ea8c2ea60224e84b2ac1b3be4482e6edc7de06e7a3, size: 556006}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-pyzmq-mac-universal2
+    type: pypi
+    package: pyzmq
+    filename: pyzmq-27.2.0-cp312-abi3-macosx_10_15_universal2.whl
+    url: https://files.pythonhosted.org/packages/57/8a/153532fa53db30e116118164f3af269a1f3966b3e2ba32c89b12fe864bd8/pyzmq-27.2.0-cp312-abi3-macosx_10_15_universal2.whl
+    pin: {version: "27.2.0", sha256: 591c8de5851c5ea372194469fe97587b97c3b641e9a70f31bb3474acbfde0241, size: 1431074}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-regex-linux-x86-64
+    type: pypi
+    package: regex
+    filename: regex-2026.9.10-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    url: https://files.pythonhosted.org/packages/20/3b/000c79c3f9c06b7542225a5d3a7f9a85405da7224b3b9af94a491d07abea/regex-2026.9.10-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+    pin: {version: "2026.9.10", sha256: bafa41b0dd63669e5c0f8adf3d24819efeb73c847f492eb011212eb352e69041, size: 804578}
+    licence: Apache-2.0 AND CNRI-Python
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-regex-linux-aarch64
+    type: pypi
+    package: regex
+    filename: regex-2026.9.10-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    url: https://files.pythonhosted.org/packages/90/9e/974d6de404c63e2d09525f4ddb99874c7ab8e1f781ccbe0dd3e26fa6f6e5/regex-2026.9.10-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+    pin: {version: "2026.9.10", sha256: 6aebdd9a946de328b3f6f61dbf48dd064a36eb6dddf96e34ae6651d37f6e9383, size: 800088}
+    licence: Apache-2.0 AND CNRI-Python
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-regex-win-amd64
+    type: pypi
+    package: regex
+    filename: regex-2026.9.10-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/cd/fd/5c85fa6cfb8e034080bda5a72fa0a4df2b7777a35eb7e73c2799c2adda7a/regex-2026.9.10-cp313-cp313-win_amd64.whl
+    pin: {version: "2026.9.10", sha256: 20e8bfb07ad79a282f8b95b56fe67f9750b1b7f775724e4ba1f23cb296115ce4, size: 277894}
+    licence: Apache-2.0 AND CNRI-Python
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-regex-win-arm64
+    type: pypi
+    package: regex
+    filename: regex-2026.9.10-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/c1/28/f5a25f6f65501675977fda35d9f61abb1468c4b87c0f73e536d8b21a60b8/regex-2026.9.10-cp313-cp313-win_arm64.whl
+    pin: {version: "2026.9.10", sha256: 3bdeed3318a8eb2bbadc9c56347e0ff651639e934a47e168d05a3b12929fd0e7, size: 277436}
+    licence: Apache-2.0 AND CNRI-Python
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-regex-mac-arm64
+    type: pypi
+    package: regex
+    filename: regex-2026.9.10-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/fa/68/241f88458b17c46ed2f80147a60a03b2ada7fb815c23b6bc76c298abb0a5/regex-2026.9.10-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "2026.9.10", sha256: d8c668af8f7bdb1d18739c27d30cd9f4b371495a883f75a002fb7a39d740fecd, size: 291741}
+    licence: Apache-2.0 AND CNRI-Python
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-rpds-py-linux-x86-64
+    type: pypi
+    package: rpds-py
+    filename: rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    url: https://files.pythonhosted.org/packages/57/d7/fe978efc2ae50abe48eb7464668ea99f53c010c60aeebb7b35ad27f23661/rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    pin: {version: "2026.6.3", sha256: acac386b453c2516111b50985d60ce46e7fadb5ea71ae7b25f4c946935bf27cf, size: 365678}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-rpds-py-linux-aarch64
+    type: pypi
+    package: rpds-py
+    filename: rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    url: https://files.pythonhosted.org/packages/9e/9b/069aa329940f8207615e091f5eedbbd40e1e15eac68a0790fd05ccdf796c/rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl  # purebyte:allow
+    pin: {version: "2026.6.3", sha256: 54f45a148e28767bf343d33a684693c70e451c6f4c0e9904709a723fafbdfc1f, size: 367984}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-rpds-py-win-amd64
+    type: pypi
+    package: rpds-py
+    filename: rpds_py-2026.6.3-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/7b/ed/a03b09668e74e5dabbf2e211f6468e1820c0552f7b0500082da31841bf7b/rpds_py-2026.6.3-cp313-cp313-win_amd64.whl
+    pin: {version: "2026.6.3", sha256: 9250a9a0a6fd4648b3f868da8d91a4c52b5811a62df58e753d50ae4454a36f80, size: 219454}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-rpds-py-win-arm64
+    type: pypi
+    package: rpds-py
+    filename: rpds_py-2026.6.3-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/27/17/b8642c12930b71bc2b25831f6708ccf0f75abcd11883932ec9ce54ba3a78/rpds_py-2026.6.3-cp313-cp313-win_arm64.whl
+    pin: {version: "2026.6.3", sha256: 900a67df3fd1660b035a4761c4ce73c382ea6b35f90f9863c36c6fd8bf8b09bb, size: 215063}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-rpds-py-mac-arm64
+    type: pypi
+    package: rpds-py
+    filename: rpds_py-2026.6.3-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/f3/6b/686d9dc4359a8f163cfbbf89ee0b4e586431de22fe8248edb63a8cf50d49/rpds_py-2026.6.3-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "2026.6.3", sha256: f4d78253f6996be4901669ad25319f842f740eccf4d58e3c7f3dd39e6dde1d8f, size: 338203}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-tokenizers-linux-x86-64
+    type: pypi
+    package: tokenizers
+    filename: tokenizers-0.23.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    url: https://files.pythonhosted.org/packages/2c/ca/ca6b93c7820df123b2662a9469e8facc826ccc94e98fdd0d615f6431e73a/tokenizers-0.23.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    pin: {version: "0.23.2", sha256: 41c2f84d172449b4dadb9cdc508e3e364076613c35b16e76ecfe47a60d1e3305, size: 3386843}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-tokenizers-linux-aarch64
+    type: pypi
+    package: tokenizers
+    filename: tokenizers-0.23.2-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    url: https://files.pythonhosted.org/packages/2e/4d/8f569ed49372a3ed8e57099bd515055fd48d7c95912c4307cda6973c2168/tokenizers-0.23.2-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    pin: {version: "0.23.2", sha256: a37039b5dfc4af84eb3ef0a92f4307e28936c8f9adccba2629d36f652e9bf7a2, size: 3516830}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-tokenizers-win-amd64
+    type: pypi
+    package: tokenizers
+    filename: tokenizers-0.23.2-cp310-abi3-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/db/f7/0a69ac6b82dbccf3f71add938a161c497952749294b8dd6dfe03a819dc40/tokenizers-0.23.2-cp310-abi3-win_amd64.whl
+    pin: {version: "0.23.2", sha256: 2e96f5699d5249c9c64aa8412e044f727aae3a4098cf830f9901ec1afc361cde, size: 2863236}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-tokenizers-win-arm64
+    type: pypi
+    package: tokenizers
+    filename: tokenizers-0.23.2-cp310-abi3-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/d7/b0/dee84cb44175be1b4c35bd2f770727494e78f0bb38e571a623ade94dbebb/tokenizers-0.23.2-cp310-abi3-win_arm64.whl
+    pin: {version: "0.23.2", sha256: e49c394456dd9985787fec76132438ba3fb8911f857b1bf3d40119f9292d41aa, size: 2729352}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-tokenizers-mac-arm64
+    type: pypi
+    package: tokenizers
+    filename: tokenizers-0.23.2-cp310-abi3-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/67/49/22da045a91732384d3a3771816bf188dc5a1f702c32e635afa7c679c0bef/tokenizers-0.23.2-cp310-abi3-macosx_11_0_arm64.whl
+    pin: {version: "0.23.2", sha256: 986670e43691469dcee610ea0f846f91a8f84e91fc6f7a48d4c064414c0ec2bf, size: 3101593}
+    licence: Apache-2.0
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-watchfiles-linux-x86-64
+    type: pypi
+    package: watchfiles
+    filename: watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    url: https://files.pythonhosted.org/packages/8a/cf/e3ad894ed5909a7c44b0707e89bc25d19a3d78b3a7aec846119443b6ae56/watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    pin: {version: "1.3.0", sha256: b5768b49e426fd5b550b012c866db347cdf15c398ef98dc557b6e6b72fa74cd1, size: 458353}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-watchfiles-linux-aarch64
+    type: pypi
+    package: watchfiles
+    filename: watchfiles-1.3.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    url: https://files.pythonhosted.org/packages/5a/61/f277cd5ead05f5d37b98b41fbdd0c943ee0c04d49738f62e902cb291cf43/watchfiles-1.3.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+    pin: {version: "1.3.0", sha256: 4af9c464d410e8c44b58ddf1cbec7c3a02c1cb2c6c80df9c74659ba2fbda0ab5, size: 454994}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-watchfiles-win-amd64
+    type: pypi
+    package: watchfiles
+    filename: watchfiles-1.3.0-cp310-abi3-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/48/a1/1c4a1b3c8030cd03206232612be8a6e8799093490c220b0fcb935d02b75a/watchfiles-1.3.0-cp310-abi3-win_amd64.whl
+    pin: {version: "1.3.0", sha256: 1acabde19b67e673274e89a04d613b7fb1f122e2c4b8ec9a581e59c149264b61, size: 290643}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-watchfiles-win-arm64
+    type: pypi
+    package: watchfiles
+    filename: watchfiles-1.3.0-cp310-abi3-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/82/e0/d2db577c632d26d08078c4390dd870b8555c4e558df25d22270f0166c71f/watchfiles-1.3.0-cp310-abi3-win_arm64.whl
+    pin: {version: "1.3.0", sha256: d978cc1dd7ba44f5590d7de74f7a9c8be7262d9e469c2c0efb8bbfc2574321dc, size: 285510}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-watchfiles-mac-arm64
+    type: pypi
+    package: watchfiles
+    filename: watchfiles-1.3.0-cp310-abi3-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/c7/8a/894799b485fe9473ad10422a0d9668e53fb78e3a2b5cc6061159572844ad/watchfiles-1.3.0-cp310-abi3-macosx_11_0_arm64.whl
+    pin: {version: "1.3.0", sha256: bbc1198edfdc90fda0600f825aa94150f428dfcbf8138746f55998e0e660d64c, size: 397647}
+    licence: MIT
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-zstandard-linux-x86-64
+    type: pypi
+    package: zstandard
+    filename: zstandard-0.25.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    url: https://files.pythonhosted.org/packages/63/4b/e3678b4e776db00f9f7b2fe58e547e8928ef32727d7a1ff01dea010f3f13/zstandard-0.25.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+    pin: {version: "0.25.0", sha256: 8e735494da3db08694d26480f1493ad2cf86e99bdd53e8e9771b2752a5c0246a, size: 5547173}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-zstandard-linux-aarch64
+    type: pypi
+    package: zstandard
+    filename: zstandard-0.25.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    url: https://files.pythonhosted.org/packages/6d/db/ddb11011826ed7db9d0e485d13df79b58586bfdec56e5c84a928a9a78c1c/zstandard-0.25.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl
+    pin: {version: "0.25.0", sha256: bfc4e20784722098822e3eee42b8e576b379ed72cca4a7cb856ae733e62192ea, size: 5063001}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-zstandard-win-amd64
+    type: pypi
+    package: zstandard
+    filename: zstandard-0.25.0-cp313-cp313-win_amd64.whl
+    url: https://files.pythonhosted.org/packages/d9/82/b9c06c870f3bd8767c201f1edbdf9e8dc34be5b0fbc5682c4f80fe948475/zstandard-0.25.0-cp313-cp313-win_amd64.whl
+    pin: {version: "0.25.0", sha256: 1f830a0dac88719af0ae43b8b2d6aef487d437036468ef3c2ea59c51f9d55fd5, size: 506232}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-zstandard-win-arm64
+    type: pypi
+    package: zstandard
+    filename: zstandard-0.25.0-cp313-cp313-win_arm64.whl
+    url: https://files.pythonhosted.org/packages/d4/57/60c3c01243bb81d381c9916e2a6d9e149ab8627c0c7d7abb2d73384b3c0c/zstandard-0.25.0-cp313-cp313-win_arm64.whl
+    pin: {version: "0.25.0", sha256: 85304a43f4d513f5464ceb938aa02c1e78c2943b29f44a750b48b25ac999a049, size: 462671}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  - id: pypi-zstandard-mac-arm64
+    type: pypi
+    package: zstandard
+    filename: zstandard-0.25.0-cp313-cp313-macosx_11_0_arm64.whl
+    url: https://files.pythonhosted.org/packages/3f/06/9ae96a3e5dcfd119377ba33d4c42a7d89da1efabd5cb3e366b156c45ff4d/zstandard-0.25.0-cp313-cp313-macosx_11_0_arm64.whl
+    pin: {version: "0.25.0", sha256: a1a4ae2dec3993a32247995bdfe367fc3266da832d82f8438c8570f989753de1, size: 640440}
+    licence: BSD-3-Clause
+    take: {members: ["**/*.so", "**/*.so.*", "**/*.pyd", "**/*.dll", "**/*.dylib", "**/*.exe"]}
+  # ---------------------------------------------------------------- Go distributions (PE / Mach-O executables)
+  - id: go-darwin-arm64
+    type: url
+    url: https://go.dev/dl/go1.27.1.darwin-arm64.tar.gz
+    mirrors: [https://dl.google.com/go/go1.27.1.darwin-arm64.tar.gz]
+    pin: {sha256: ee215d57e0ec269c60cc9ceca68e6bda321ba9ee5afe24f4b0988703c2d87d12, size: 68100347}
+    licence: BSD-3-Clause
+    package: {ecosystem: golang, name: go, version: "go1.27.1-darwin-arm64"}
+    take: {members: ["go/bin/*", "go/pkg/tool/*/*"]}
+  - id: go-windows-amd64
+    type: url
+    url: https://go.dev/dl/go1.27.1.windows-amd64.zip
+    mirrors: [https://dl.google.com/go/go1.27.1.windows-amd64.zip]
+    pin: {sha256: a3911b5e0e1b1053f25ed0675f4c1c6aad1e2bfcf253df2b9be4caabd2edd95d, size: 78931360}
+    licence: BSD-3-Clause
+    package: {ecosystem: golang, name: go, version: "go1.27.1-windows-amd64"}
+    take: {members: ["go/bin/*", "go/pkg/tool/*/*"]}
+  - id: go-windows-arm64
+    type: url
+    url: https://go.dev/dl/go1.27.1.windows-arm64.zip
+    mirrors: [https://dl.google.com/go/go1.27.1.windows-arm64.zip]
+    pin: {sha256: 13b69b87bb0e83f96bc68560a8cace7f0343b1e03469f1110ea18d17e3234069, size: 75038673}
+    licence: BSD-3-Clause
+    package: {ecosystem: golang, name: go, version: "go1.27.1-windows-arm64"}
+    take: {members: ["go/bin/*", "go/pkg/tool/*/*"]}
+  # ---------------------------------------------------------------- CPython for Windows, embeddable (PE + .pyc)
+  - id: python-3.13.7-embed-win32
+    type: url
+    url: https://www.python.org/ftp/python/3.13.7/python-3.13.7-embed-win32.zip
+    pin: {sha256: 19248889d63e1599bc6ae132a40a737d9143e4917d79156e157418f5efc50019, size: 9681134}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-win32, version: "3.13.7"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  - id: python-3.13.7-embed-amd64
+    type: url
+    url: https://www.python.org/ftp/python/3.13.7/python-3.13.7-embed-amd64.zip
+    pin: {sha256: f6cca216a359be84797cabb54149ce5e062afb16cc7567eb7fc51cacb2d86b65, size: 10922561}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-amd64, version: "3.13.7"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  - id: python-3.13.7-embed-arm64
+    type: url
+    url: https://www.python.org/ftp/python/3.13.7/python-3.13.7-embed-arm64.zip
+    pin: {sha256: 2ddcf25e71f7205e652ebb57439f22fd2bab37d7f5c9152dbe32867bf2c77a50, size: 10189593}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-arm64, version: "3.13.7"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  - id: python-3.12.10-embed-win32
+    type: url
+    url: https://www.python.org/ftp/python/3.12.10/python-3.12.10-embed-win32.zip
+    pin: {sha256: 084b9eb24cb848605c895d05b738fbc2572efc8b4c18c415a824065864a2b853, size: 9960069}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-win32, version: "3.12.10"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  - id: python-3.12.10-embed-amd64
+    type: url
+    url: https://www.python.org/ftp/python/3.12.10/python-3.12.10-embed-amd64.zip
+    pin: {sha256: 4acbed6dd1c744b0376e3b1cf57ce906f9dc9e95e68824584c8099a63025a3c3, size: 11133606}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-amd64, version: "3.12.10"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  - id: python-3.12.10-embed-arm64
+    type: url
+    url: https://www.python.org/ftp/python/3.12.10/python-3.12.10-embed-arm64.zip
+    pin: {sha256: 3065efc3d382d1cda66757ac71ade11904fa6e350f5a97eb74811acd71ba5532, size: 10413299}
+    licence: PSF-2.0
+    package: {ecosystem: cpython, name: python-embed-arm64, version: "3.12.10"}
+    take: {members: ["*.exe", "*.dll", "*.pyd", "**/*.pyc"], nested: ["python3*.zip"]}
+  # ---------------------------------------------------------------- Git for Windows, 7-Zip, WebAssembly
+  - id: mingit-x64
+    type: url
+    url: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/MinGit-2.55.0.5-64-bit.zip
+    pin: {sha256: 56d7b226b7693196cfc71fef26568f536c4a021ab6c37ff2db4287bed908e96e, size: 38989688}
+    licence: GPL-2.0-only
+    package: {ecosystem: github-release, name: git-for-windows/MinGit-x64, version: "v2.55.0.windows.5"}
+    take: {members: ["**/*.exe", "**/*.dll"]}
+  - id: mingit-arm64
+    type: url
+    url: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/MinGit-2.55.0.5-arm64.zip
+    pin: {sha256: 05843f9d6e60306c3ab886799e2c67200caab921571f10512df3493049179ddb, size: 37650057}
+    licence: GPL-2.0-only
+    package: {ecosystem: github-release, name: git-for-windows/MinGit-arm64, version: "v2.55.0.windows.5"}
+    take: {members: ["**/*.exe", "**/*.dll"]}
+  - id: 7zip-linux
+    type: url
+    url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-x64.tar.xz
+    pin: {sha256: dc99eff5008f1ab79bd7084c68513701547a808a89502bf4133683535ab3c695, size: 1575072}
+    licence: LGPL-2.1-or-later AND BSD-3-Clause
+    package: {ecosystem: github-release, name: ip7z/7zip-linux, version: "26.03"}
+    take: {members: ["7zz"]}
+  - id: 7zip-mac
+    type: url
+    url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-mac.tar.xz
+    pin: {sha256: 5ca87677072c59f5602e5c49baa27d4694bacd2259b4e507f0094249d4281480, size: 1863192}
+    licence: LGPL-2.1-or-later AND BSD-3-Clause
+    package: {ecosystem: github-release, name: ip7z/7zip-mac, version: "26.03"}
+    take: {members: ["7zz"]}
+  - id: 7zip-exe
+    type: url
+    url: https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe
+    pin: {sha256: ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d, size: 602624}
+    licence: LGPL-2.1-or-later AND BSD-3-Clause
+    package: {ecosystem: github-release, name: ip7z/7zip-exe, version: "26.03"}
+  - id: sqljs-wasm
+    type: url
+    url: https://github.com/sql-js/sql.js/releases/download/v1.14.2/sqljs-wasm.zip
+    pin: {sha256: 495be0a6f586bbf7f3df2e81a288f7dd9ef82cf8876a36a80a00f77b6a2fa1a3, size: 339862}
+    licence: MIT
+    package: {ecosystem: github-release, name: sql-js/sql.js, version: "v1.14.2"}
+    take: {members: ["*.wasm"]}
+  - id: tree-sitter-bash-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-bash/releases/download/v0.25.1/tree-sitter-bash.wasm
+    pin: {sha256: 8292919c88a0f7d3fb31d0cd0253ca5a9531bc1ede82b0537f2c63dd8abe6a7a, size: 1358224}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-bash/tree-sitter-bash.wasm, version: "v0.25.1"}
+  - id: tree-sitter-c-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-c/releases/download/v0.24.2/tree-sitter-c.wasm
+    pin: {sha256: 83e8d7902b9d7f8c7c5cd4bd9acb5c7eb5faf42c09f85546b183964d3b5f48f9, size: 645157}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-c/tree-sitter-c.wasm, version: "v0.24.2"}
+  - id: tree-sitter-css-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-css/releases/download/v0.25.0/tree-sitter-css.wasm
+    pin: {sha256: 8a23977fe271357cce6f254ef88c9bebf3854602d8046605aef6a45c02135c59, size: 128668}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-css/tree-sitter-css.wasm, version: "v0.25.0"}
+  - id: tree-sitter-embedded-template-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-embedded-template/releases/download/v0.25.0/tree-sitter-embedded_template.wasm
+    pin: {sha256: d15bbf3cb90901d0372b5599761c7a1ada344a0f11573c173ace7042636a6174, size: 5531}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-embedded-template/tree-sitter-embedded_template.wasm, version: "v0.25.0"}
+  - id: tree-sitter-go-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-go/releases/download/v0.25.0/tree-sitter-go.wasm
+    pin: {sha256: 9504573f352b20be7f2f1911754d710622aedc15afff16d5ed8fb5645681aee7, size: 217182}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-go/tree-sitter-go.wasm, version: "v0.25.0"}
+  - id: tree-sitter-javascript-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-javascript/releases/download/v0.25.0/tree-sitter-javascript.wasm
+    pin: {sha256: 5fb488d0cabb4775a594bab85682de5ad6ce83c0d6ac997a9f82dd084d571240, size: 411770}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-javascript/tree-sitter-javascript.wasm, version: "v0.25.0"}
+  - id: tree-sitter-jsdoc-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-jsdoc/releases/download/v0.25.0/tree-sitter-jsdoc.wasm
+    pin: {sha256: 5530e630fd42424b1c026ec4b2b260ff1b73b78b7040239ac33d4be22a9b2271, size: 30206}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-jsdoc/tree-sitter-jsdoc.wasm, version: "v0.25.0"}
+  - id: tree-sitter-julia-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-julia/releases/download/v0.25.0/tree-sitter-julia.wasm
+    pin: {sha256: b20da9dc7d7334e2cae034ca4974dd09c94be8c0a524df1fc194b545bc2f49f5, size: 2636367}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-julia/tree-sitter-julia.wasm, version: "v0.25.0"}
+  - id: tree-sitter-ocaml-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-ocaml/releases/download/v0.26.0/tree-sitter-ocaml.wasm
+    pin: {sha256: bfa3eef92b9d3cc1117aa486d46ecb06c98a3a28c1747660aaa5851df5e4530c, size: 4808294}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-ocaml/tree-sitter-ocaml.wasm, version: "v0.26.0"}
+  - id: tree-sitter-ocaml-interface-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-ocaml/releases/download/v0.26.0/tree-sitter-ocaml_interface.wasm
+    pin: {sha256: 3ce03850c36618e3530292372aae9156a45b5a923210a87c285539d7f13b0354, size: 4067271}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-ocaml/tree-sitter-ocaml_interface.wasm, version: "v0.26.0"}
+  - id: tree-sitter-ocaml-type-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-ocaml/releases/download/v0.26.0/tree-sitter-ocaml_type.wasm
+    pin: {sha256: 3216412ee2300b8029a230208c57a2f62eadb5737d5632d35cc953516905df6f, size: 3951401}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-ocaml/tree-sitter-ocaml_type.wasm, version: "v0.26.0"}
+  - id: tree-sitter-php-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-php/releases/download/v0.24.2/tree-sitter-php.wasm
+    pin: {sha256: d4df6a6ff08c87c3ec4f9cbb785fe09998a0cb570e03f57d7b19b3acfb146aa7, size: 1058041}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-php/tree-sitter-php.wasm, version: "v0.24.2"}
+  - id: tree-sitter-php-only-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-php/releases/download/v0.24.2/tree-sitter-php_only.wasm
+    pin: {sha256: fd1bcff3ac7699be20012089f6af81e6829cd73d640ab13d16adef236cc4b2af, size: 1002407}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-php/tree-sitter-php_only.wasm, version: "v0.24.2"}
+  - id: tree-sitter-python-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-python/releases/download/v0.25.0/tree-sitter-python.wasm
+    pin: {sha256: 16108b50df4ee9a30168794252ab55e7c93bfc5765d7fa0aa3e335752c515f47, size: 457883}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-python/tree-sitter-python.wasm, version: "v0.25.0"}
+  - id: tree-sitter-regex-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-regex/releases/download/v0.25.0/tree-sitter-regex.wasm
+    pin: {sha256: e63c28e3a023614e14f2086b0d818e190239ebe5b2fcce7e64a9940091d83a79, size: 21162}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-regex/tree-sitter-regex.wasm, version: "v0.25.0"}
+  - id: tree-sitter-rust-wasm
+    type: url
+    url: https://github.com/tree-sitter/tree-sitter-rust/releases/download/v0.24.2/tree-sitter-rust.wasm
+    pin: {sha256: 24c89bd9252255e4aebbcbd7d2d308bd92c86dd95a130fdc80efa49577b8d738, size: 1118099}
+    licence: MIT
+    package: {ecosystem: github-release, name: tree-sitter/tree-sitter-rust/tree-sitter-rust.wasm, version: "v0.24.2"}
+  # ---------------------------------------------------------------- Maven Central jars (class files, jars, native libraries)
+  - id: maven-commons-codec
+    type: url
+    url: https://repo1.maven.org/maven2/commons-codec/commons-codec/1.18.0/commons-codec-1.18.0.jar
+    pin: {sha256: ba005f304cef92a3dede24a38ad5ac9b8afccf0d8f75839d6c1338634cf7f6e4, size: 373045}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "commons-codec:commons-codec", version: "1.18.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-commons-io
+    type: url
+    url: https://repo1.maven.org/maven2/commons-io/commons-io/2.19.0/commons-io-2.19.0.jar
+    pin: {sha256: 824268919b4b62f9f40f08c54381de5993b078f58667e332d17348ae019d72b9, size: 556073}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "commons-io:commons-io", version: "2.19.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-commons-compress
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.jar
+    pin: {sha256: 293d80f54b536b74095dcd7ea3cf0a29bbfc3402519281332495f4420d370d16, size: 1087319}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.commons:commons-compress", version: "1.27.1"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-jackson-core
+    type: url
+    url: https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.19.2/jackson-core-2.19.2.jar
+    pin: {sha256: aa77eaf29293a868c47372194f7c5287d77d9370b04ea25d3fffc1e4904b5880, size: 591418}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "com.fasterxml.jackson.core:jackson-core", version: "2.19.2"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-netty-codec-http
+    type: url
+    url: https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.1.119.Final/netty-codec-http-4.1.119.Final.jar
+    pin: {sha256: ff48db63e44e273e677832e52cc2a1ce2670da796f22af129a8bd4c3786a2d34, size: 676321}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "io.netty:netty-codec-http", version: "4.1.119.Final"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-netty-transport
+    type: url
+    url: https://repo1.maven.org/maven2/io/netty/netty-transport/4.1.119.Final/netty-transport-4.1.119.Final.jar
+    pin: {sha256: c0921ea0e79c3b936daabe08a26e926642a4ad24951d6115fb43362c21dfeb10, size: 521425}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "io.netty:netty-transport", version: "4.1.119.Final"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-slf4j-api
+    type: url
+    url: https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar
+    pin: {sha256: 7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832, size: 69908}
+    licence: MIT
+    package: {ecosystem: maven, name: "org.slf4j:slf4j-api", version: "2.0.17"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-snakeyaml
+    type: url
+    url: https://repo1.maven.org/maven2/org/yaml/snakeyaml/2.4/snakeyaml-2.4.jar
+    pin: {sha256: ef779af5d29a9dde8cc70ce0341f5c6f7735e23edff9685ceaa9d35359b7bb7f, size: 339825}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.yaml:snakeyaml", version: "2.4"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-sqlite-jdbc
+    type: url
+    url: https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.36.0/sqlite-jdbc-3.36.0.jar
+    pin: {sha256: c0f13672668ec479dbf685dcadf6c2dd2fb44f266f99a90624dde46eb5524aaf, size: 7400638}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.xerial:sqlite-jdbc", version: "3.36.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-lz4-java
+    type: url
+    url: https://repo1.maven.org/maven2/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar
+    pin: {sha256: d74a3334fb35195009b338a951f918203d6bbca3d1d359033dc33edd1cadc9ef, size: 682804}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.lz4:lz4-java", version: "1.8.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-zstd-jni
+    type: url
+    url: https://repo1.maven.org/maven2/com/github/luben/zstd-jni/1.5.6-4/zstd-jni-1.5.6-4.jar
+    pin: {sha256: 793ca8734aa15687e7e64564eab8b6ae9ee2720eae27aa663074682144b1c386, size: 6687870}
+    licence: BSD-2-Clause
+    package: {ecosystem: maven, name: "com.github.luben:zstd-jni", version: "1.5.6-4"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-snappy-java
+    type: url
+    url: https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.10.5/snappy-java-1.1.10.5.jar
+    pin: {sha256: 0f3f1857ed33116583f480b4df5c0218836c47bfbc9c6221c0d73f356decf37b, size: 2299797}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.xerial.snappy:snappy-java", version: "1.1.10.5"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-postgresql
+    type: url
+    url: https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.5/postgresql-42.7.5.jar
+    pin: {sha256: 69020b3bd20984543e817393f2e6c01a890ef2e37a77dd11d6d8508181d079ab, size: 1087908}
+    licence: BSD-2-Clause
+    package: {ecosystem: maven, name: "org.postgresql:postgresql", version: "42.7.5"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-httpclient
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
+    pin: {sha256: c8bc7e1c51a6d4ce72f40d2ebbabf1c4b68bfe76e732104b04381b493478e9d6, size: 785639}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.httpcomponents:httpclient", version: "4.5.14"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-httpcore
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar
+    pin: {sha256: 6c9b3dd142a09dc468e23ad39aad6f75a0f2b85125104469f026e52a474e464f, size: 327891}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.httpcomponents:httpcore", version: "4.4.16"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-spring-core
+    type: url
+    url: https://repo1.maven.org/maven2/org/springframework/spring-core/6.2.12/spring-core-6.2.12.jar
+    pin: {sha256: bddc5a5be2d94191ebcfbadc672fa4d81e6ab51e38a9eaf41d5d035cb17548d4, size: 1969697}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.springframework:spring-core", version: "6.2.12"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-kafka-clients
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.9.0/kafka-clients-3.9.0.jar
+    pin: {sha256: 15c1e137f2c2c94398e27abc4060a03b6bde10bf9fac15e8f70c02320b202f18, size: 9204801}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.kafka:kafka-clients", version: "3.9.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-grpc-core
+    type: url
+    url: https://repo1.maven.org/maven2/io/grpc/grpc-core/1.69.1/grpc-core-1.69.1.jar
+    pin: {sha256: 51352cadaecbf9a4a4aa42d93f6f1fc728f1fd01b051680383ed09e5631ffbd0, size: 653323}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "io.grpc:grpc-core", version: "1.69.1"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-log4j-core
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.24.1/log4j-core-2.24.1.jar
+    pin: {sha256: 00bcf388472ca80a687014181763b66d777177f22cbbf179fd60e1b1ac9bc9b0, size: 1910958}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.logging.log4j:log4j-core", version: "2.24.1"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-jetty-server
+    type: url
+    url: https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-server/12.0.29/jetty-server-12.0.29.jar
+    pin: {sha256: 5aa066639f8f2c33dbd840b201682921e34aacd08c596a09ea978b3e87995e3a, size: 636930}
+    licence: EPL-2.0 OR Apache-2.0
+    package: {ecosystem: maven, name: "org.eclipse.jetty:jetty-server", version: "12.0.29"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-byte-buddy
+    type: url
+    url: https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.jar
+    pin: {sha256: 2b5ddc8c1f4234bdb7cb45338a8e10a13e0e3ca473e91d5d821d681127ea8ba1, size: 9018553}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "net.bytebuddy:byte-buddy", version: "1.17.8"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-asm
+    type: url
+    url: https://repo1.maven.org/maven2/org/ow2/asm/asm/9.9/asm-9.9.jar
+    pin: {sha256: 03d99a74ad1ee5c71334ef67437f4ef4fe3488caa7c96d8645abc73c8e2017d4, size: 126122}
+    licence: BSD-3-Clause
+    package: {ecosystem: maven, name: "org.ow2.asm:asm", version: "9.9"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-groovy
+    type: url
+    url: https://repo1.maven.org/maven2/org/apache/groovy/groovy/4.0.22/groovy-4.0.22.jar
+    pin: {sha256: f9d8bd4d65852c18194e353c77f3d2c23e0013856951c5430ba56972d2f67a1e, size: 7601005}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "org.apache.groovy:groovy", version: "4.0.22"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-mockito-core
+    type: url
+    url: https://repo1.maven.org/maven2/org/mockito/mockito-core/5.17.0/mockito-core-5.17.0.jar
+    pin: {sha256: dff59ad8c61b026ef86cc113f94f2301eb06caaf81dec30c78a96a1a65595c5e, size: 709090}
+    licence: MIT
+    package: {ecosystem: maven, name: "org.mockito:mockito-core", version: "5.17.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-junit-jupiter-api
+    type: url
+    url: https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2.jar
+    pin: {sha256: 0b9ca728e4bcd9adc57f29deb9556ff9ed5e08b4e8843b875aba4e4e3e04f092, size: 233372}
+    licence: EPL-2.0
+    package: {ecosystem: maven, name: "org.junit.jupiter:junit-jupiter-api", version: "5.12.2"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}
+  - id: maven-reactor-core
+    type: url
+    url: https://repo1.maven.org/maven2/io/projectreactor/reactor-core/3.5.0/reactor-core-3.5.0.jar
+    pin: {sha256: 7bcb67169f86171a9340e244a026684c8e35bdf1905f8cc8698a5853f28a96fb, size: 1775344}
+    licence: Apache-2.0
+    package: {ecosystem: maven, name: "io.projectreactor:reactor-core", version: "3.5.0"}
+    take: {members: ["**/*.class", "**/*.so", "**/*.dll", "**/*.dylib", "**/*.jnilib"], include: ["$self"]}

@@ -1,0 +1,20 @@
+# pii: personal data in any bytes (prose, records, logs, code; 23 languages in its training data), masked as one type,
+# PII, for redaction by copy. See README.md.
+name: pii
+public_name: pii
+description: personal data masked as one type (PII), for redaction by copy
+plugin: plugin.py                  # registers `pii_mask` (the released recipe) and `pii_spans` (the experimental typed one)
+uses: [secrets-code]               # the SECRET type of the generator reuses the credential generator and its catalogs
+export:                            # what the exported GGUF declares (spec/FORMAT.md)
+  profile: redact                  # spec/OUTPUT.md section 9: the output is the input with each span replaced by [TYPE_n]
+                                   # the type names are the recipe's `output_schema.labels`: [PII] for pii 1.0.0
+  window: {size: 512, stride: 384, min: 1}   # min 1: an input shorter than the default minimum (24 bytes) is scanned too
+  ngram_bits: 4                    # the n-gram memory at 4 bits: nano_n15's tables take 3.7 MB instead of 25 MB
+  license: other                   # informative `general.license*` keys (MODEL_LICENSE.md)
+  license_name: PureByte Model License
+release:
+  ensemble: 1                      # one model: the seed best on `select` among the six
+  vote: 1
+exams:                             # evaluation sets whose fingerprints the leak check requires (data/exams/*.yaml)
+  - piimb                          # the PII masking benchmark (evaluation only; its license forbids training on it)
+  - pii-bench-test                 # fixed mix of public test / validation splits (Nemotron-PII, OpenPII-1M, Gretel finance)

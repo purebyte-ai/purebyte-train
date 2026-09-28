@@ -1,0 +1,159 @@
+# Training resources of the PII specialist: public name / place / sentence lists and public TRAIN documents.
+#
+#   python data/fetch_pii.py lists     -> $PUREBYTE_DATA/pii/lists/*.tsv + LICENSES.md + SHA256.json
+#   python data/fetch_pii.py train     -> $PUREBYTE_DATA/pii/public_train/<source>.jsonl + MANIFEST.json
+#
+# No list holds personal data: they are frequency lists of given names and surnames, a street map, a gazetteer and
+# sentences written by volunteers. The generator composes SYNTHETIC people from them. The TRAIN documents are synthetic
+# PII datasets; only their train splits are used (their test / validation splits are evaluation material, see
+# data/exams/pii.yaml, and the identity check refuses a source that uses one).
+#
+# Upstream files that are replaced in place by their publishers (the INE tables, the Tatoeba exports) are pinned by the
+# sha256 of the copy the released models were built from. When the publisher has replaced a file, the download stops
+# with a sha256 mismatch; `fetch_pii.py lists --accept-upstream-change` then uses the current file and writes the new
+# digest into the build manifest as a deviation, and `--skip-sentences` builds every list but the two Tatoeba ones
+# (which only the prose and e-mail scenes read). No mirror of the pinned copies exists yet (data/README.md).
+#
+# `reference_sha256` of a TRAIN source: the sha256 of its sample as the build writes it (one JSON document per line,
+# LF line ends) BEFORE the exclusion step; the sample the released models were built from. build_pii_pool.py draws the
+# same samples from the pinned files of data/sources/pii-pool.yaml and checks them against these digests.
+#
+# Attribution required by the licences (carry it into model cards): "Contains data from the Instituto Nacional de
+# Estadistica (INE), www.ine.es, CC BY 4.0"; "Sentences from Tatoeba (tatoeba.org), CC BY 2.0 FR"; "Ai4Privacy /
+# Ai Suisse SA OpenPII-1M, CC BY 4.0"; "NVIDIA Nemotron-PII, CC BY 4.0"; "Gretel.ai datasets, Apache 2.0".
+schema: 1
+kind: source
+name: pii
+description: Public lists (names, surnames, streets, places, sentences) and public TRAIN documents for the PII specialist.
+output: pii/
+builder: fetch_pii.py
+build:
+  seed: 0
+  streets_kept: 80000
+  sentences_kept: 150000
+  sentences_safe_first_names: 4000
+  train_documents_per_source: 12000
+entries:
+  # ---------------------------------------------------------------- Spain, INE (CC BY 4.0)
+  - id: ine-given-names
+    type: url
+    url: https://www.ine.es/daco/daco42/nombyapel/nombres_por_edad_media.xlsx
+    pin: {sha256: 1edb4e05f9ba539efb19205c94d5c1c0d97124f4e99fa5a30163d7b67bab7305, size: 2503760}
+    licence: CC-BY-4.0
+    description: Given names by frequency, census of 1 January 2025.
+    files: [{name: nombres_por_edad_media.xlsx, sha256: 1edb4e05f9ba539efb19205c94d5c1c0d97124f4e99fa5a30163d7b67bab7305, size: 2503760}]
+  - id: ine-surnames
+    type: url
+    url: https://www.ine.es/daco/daco42/nombyapel/apellidos_frecuencia.xls
+    pin: {sha256: 93e894da8e33332a11725bf07295db5607d64e2d40d3a8d3607fcd42f8f2cf28, size: 14858752}
+    licence: CC-BY-4.0
+    description: Surnames by frequency, census of 1 January 2025 (legacy .xls, read with data/pbdata/xls.py).
+    files: [{name: apellidos_frecuencia.xls, sha256: 93e894da8e33332a11725bf07295db5607d64e2d40d3a8d3607fcd42f8f2cf28, size: 14858752}]
+  - id: ine-street-map
+    type: url
+    url: https://www.ine.es/prodyser/callejero/caj_esp/caj_esp_012026.zip
+    pin: {sha256: e168e6b601f8c96a3ad5a42f452ce10def33fc109389a85d6632db86b2ea1fb2, size: 49622026}
+    licence: CC-BY-4.0
+    description: Street map of the electoral census, January 2026 (streets with the postcode of one of their sections).
+    files: [{name: caj_esp_012026.zip, sha256: e168e6b601f8c96a3ad5a42f452ce10def33fc109389a85d6632db86b2ea1fb2, size: 49622026}]
+  - id: ine-street-types
+    type: url
+    url: https://www.ine.es/prodyser/callejero/TiposVia.csv
+    pin: {sha256: c116aa068a0ddb8cb9348a2ff67de4b821dcacc0a06f936deb3c5cfc7af38c49, size: 14203}
+    licence: CC-BY-4.0
+    files: [{name: TiposVia.csv, sha256: c116aa068a0ddb8cb9348a2ff67de4b821dcacc0a06f936deb3c5cfc7af38c49, size: 14203}]
+  - id: ine-municipalities
+    type: url
+    url: https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx
+    pin: {sha256: 07f8e8d64eba73fe9d425196fe82f4e09a9886a287abd650e88ca8d98dd49052, size: 306819}
+    licence: CC-BY-4.0
+    files: [{name: diccionario26.xlsx, sha256: 07f8e8d64eba73fe9d425196fe82f4e09a9886a287abd650e88ca8d98dd49052, size: 306819}]
+  # ---------------------------------------------------------------- United States, Census Bureau (public domain)
+  - id: census-male-first-names
+    type: url
+    url: https://www2.census.gov/topics/genealogy/1990surnames/dist.male.first
+    pin: {sha256: 0a5078ef6effe3b483d15b0f7f95047662126c9bfb624ecd5e5b978fc0f2470b, size: 42665}
+    licence: LicenseRef-US-Government-Public-Domain
+    files: [{name: dist.male.first, sha256: 0a5078ef6effe3b483d15b0f7f95047662126c9bfb624ecd5e5b978fc0f2470b, size: 42665}]
+  - id: census-female-first-names
+    type: url
+    url: https://www2.census.gov/topics/genealogy/1990surnames/dist.female.first
+    pin: {sha256: bd2f310fc4e5d5e5ea122c9d4342c9821145823118eb20db1647f305ec77b358, size: 149625}
+    licence: LicenseRef-US-Government-Public-Domain
+    files: [{name: dist.female.first, sha256: bd2f310fc4e5d5e5ea122c9d4342c9821145823118eb20db1647f305ec77b358, size: 149625}]
+  - id: census-surnames-2010
+    type: url
+    url: https://www2.census.gov/topics/genealogy/2010surnames/names.zip
+    pin: {sha256: 117c41cb4668727b7627b2845b6df3f83eb2a22a1813f42c0ff4bdcab86de135, size: 12874389}
+    licence: LicenseRef-US-Government-Public-Domain
+    files: [{name: names.zip, sha256: 117c41cb4668727b7627b2845b6df3f83eb2a22a1813f42c0ff4bdcab86de135, size: 12874389}]
+  - id: census-gazetteer-places-2020
+    type: url
+    url: https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_Gaz_place_national.zip
+    pin: {sha256: 6e5745b3e1adf7a1e024a988301d484697e2a0f25b3cf10114eef676f09d5c18, size: 1206088}
+    licence: LicenseRef-US-Government-Public-Domain
+    files: [{name: 2020_Gaz_place_national.zip, sha256: 6e5745b3e1adf7a1e024a988301d484697e2a0f25b3cf10114eef676f09d5c18, size: 1206088}]
+  # ---------------------------------------------------------------- Tatoeba sentences (CC BY 2.0 FR)
+  - id: tatoeba-spanish
+    type: url
+    url: https://downloads.tatoeba.org/exports/per_language/spa/spa_sentences.tsv.bz2
+    pin: {sha256: dacf3161284a76cda5eccc66ffddbe0b29d25b2d2042347e7a6b2cfaee42c4bf, size: 6352408}
+    licence: LicenseRef-CC-BY-2.0-FR
+    description: The weekly export served on 2026-09-23 (Last-Modified 2026-09-19; Tatoeba replaces its exports weekly; CC BY 2.0 FR).
+    files: [{name: spa_sentences.tsv.bz2, sha256: dacf3161284a76cda5eccc66ffddbe0b29d25b2d2042347e7a6b2cfaee42c4bf, size: 6352408}]
+  - id: tatoeba-english
+    type: url
+    url: https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences.tsv.bz2
+    pin: {sha256: 69a8ff3de808313a75c5305f4f7b3f4c9d3460c1bd9fdf0f375da247c2d02489, size: 24878903}
+    licence: LicenseRef-CC-BY-2.0-FR
+    description: The weekly export served on 2026-09-23 (Last-Modified 2026-09-19; Tatoeba replaces its exports weekly; CC BY 2.0 FR).
+    files: [{name: eng_sentences.tsv.bz2, sha256: 69a8ff3de808313a75c5305f4f7b3f4c9d3460c1bd9fdf0f375da247c2d02489, size: 24878903}]
+  # ---------------------------------------------------------------- Faker (MIT): only the street suffix words are read
+  - id: faker-address-en-us
+    type: url
+    url: https://raw.githubusercontent.com/joke2k/faker/975dd2a11d7f083cb028e2f07478ab401b5fde17/faker/providers/address/en_US/__init__.py
+    pin: {sha256: e428c37795535b446e2d48c1503917d3e80297abcb8ca3bf16b8f459950e8bcc, size: 13688}
+    licence: MIT
+    identities: ["repo:https://github.com/joke2k/faker"]
+    files: [{name: faker_address_en_US.py, sha256: e428c37795535b446e2d48c1503917d3e80297abcb8ca3bf16b8f459950e8bcc, size: 13688}]
+  - id: faker-licence
+    type: url
+    url: https://raw.githubusercontent.com/joke2k/faker/975dd2a11d7f083cb028e2f07478ab401b5fde17/LICENSE.txt
+    pin: {sha256: cd5a5fbc8bacca52b88158ca562ac5f7c2e9adb27371cead51aaf4e61a657928, size: 1060}
+    licence: MIT
+    files: [{name: faker_LICENSE.txt, sha256: cd5a5fbc8bacca52b88158ca562ac5f7c2e9adb27371cead51aaf4e61a657928, size: 1060}]
+  # ---------------------------------------------------------------- public TRAIN documents (synthetic PII)
+  - id: openpii-1m-train
+    type: hf
+    dataset: ai4privacy/pii-masking-openpii-1m
+    pin: {revision: ecfdc547f4a0955600cfe6ab98ba2a162207fcc0}
+    splits: [train]
+    licence: CC-BY-4.0
+    files: [{path: data/train.jsonl}]
+    sampling: {method: byte-slices, languages: [en, es], slices: 30, output: ai4privacy_openpii1m.jsonl,
+               reference_sha256: e95f9b7e139884e0d2c41f841fba622b47248c0f5e0c3f6332f4ae5b6a2c25ae}
+  - id: nemotron-pii-train
+    type: hf
+    dataset: nvidia/Nemotron-PII
+    pin: {revision: b70ffaf5ff39e079776134c5bf4381f00a9fd1ed}
+    splits: [train]
+    licence: CC-BY-4.0
+    sampling: {method: pages, page: 100, seed: 1, output: nemotron.jsonl,
+               reference_sha256: 70fdade9078e97735c0f392cdf1bc830bb6507c34838542f703a90b8a4b21478}
+  - id: gretel-pii-masking-en-v1-train
+    type: hf
+    dataset: gretelai/gretel-pii-masking-en-v1
+    pin: {revision: e06eb1499ca8d54470f085021cd8e54f9efac7fd}
+    splits: [train]
+    licence: Apache-2.0
+    sampling: {method: pages, page: 100, seed: 2, fraction: 0.5, output: gretel_en_v1.jsonl,
+               reference_sha256: 03a9e6bc30b909a2690ff782367c2bf1b52ea85c97cfceedacf5a5c2faf51e49}
+  - id: gretel-finance-multilingual-train
+    type: hf
+    dataset: gretelai/synthetic_pii_finance_multilingual
+    pin: {revision: 7b844d16738527a04264f50214cb426a4cea0897}
+    splits: [train]
+    licence: Apache-2.0
+    sampling: {method: pages, page: 100, seed: 3, fraction: 0.5, languages: [Spanish, English],
+               output: gretel_finance.jsonl,
+               reference_sha256: c0543da27c19d017176809b13c4671cfcc24463b13f1d86d692fc997e6ac5afe}

@@ -1,0 +1,123 @@
+# Test the training stack, the specialists and the data scripts on CPU (AGENTS.md#build-and-test).
+#
+# The `training` job builds the runtime's model_dump tool from purebyte-ai/purebyte at RUNTIME_REF, so that every file
+# the tests export is also run in the C++ engine (PUREBYTE_MODEL_DUMP), and checks that the pinned copies of the
+# runtime's NumPy reference (reference/purebyte_ref) and benchmark scorers (benchmarks/*/score.py) are identical to
+# the runtime's at that ref.
+# No test downloads data or needs anything outside the repository; the ones that cannot run here skip themselves and
+# say why (-rs lists them): the GPU tests (PBTRAIN_GPU_TESTS=1 on a GPU box) and the golden weight fingerprints. Those
+# match only on the machine that recorded them (Windows x86-64 with AVX2 kernels, Python 3.10.14, torch 2.4.1+cpu,
+# NumPy 2.2.1, one thread): CPU kernels round differently on other processors, so CI skips them and the maintainers
+# compare them on that machine before each release. The determinism tests run everywhere.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PBTRAIN_GOLDEN_SKIP: "1"  # the golden weights match only on the recording machine (see above)
+  # The runtime release whose engine, reference and scorers this repository is checked against: a tag of
+  # purebyte-ai/purebyte, which must exist (it is pushed with the runtime before this repository's first CI run).
+  # Bump it on purpose, in the same change that refreshes reference/ and benchmarks/ from that release.
+  RUNTIME_REF: v1.0.0
+
+jobs:
+  training:
+    name: training (Linux CPU, engine check)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: purebyte-ai/purebyte
+          ref: ${{ env.RUNTIME_REF }}
+          path: purebyte
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: The pinned copies are the runtime's (reference, benchmark scorers)
+        run: |
+          diff -r purebyte/reference/purebyte_ref reference/purebyte_ref
+          diff purebyte/benchmarks/creddata/score.py benchmarks/creddata/score.py
+          diff purebyte/benchmarks/piimb/score.py benchmarks/piimb/score.py
+      - name: Install (CPU wheels)
+        run: pip install -r training/requirements-ci.txt
+      - name: Build the engine's model_dump
+        run: |
+          cmake -S purebyte -B purebyte/build -DCMAKE_BUILD_TYPE=Release -DPUREBYTE_BUILD_CLI=OFF -DPUREBYTE_BUILD_SHARED=OFF
+          cmake --build purebyte/build --target model_dump --parallel
+          echo "PUREBYTE_MODEL_DUMP=$PWD/purebyte/build/tests/model_dump" >> "$GITHUB_ENV"
+      - name: training/tests
+        run: python -m pytest -q -rs -p no:cacheprovider training/tests
+      - name: specialists/*/tests
+        run: |
+          for suite in specialists/*/tests; do
+            python -m pytest -q -rs -p no:cacheprovider "$suite"
+          done
+
+  # The training contract on the other operating systems, CPU only (the golden weight fingerprints skip there), and on
+  # the oldest Python the package declares (requires-python >= 3.10).
+  training-os:
+    name: training (${{ matrix.os }} CPU, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: windows-2022, python: "3.12"}
+          - {os: macos-15, python: "3.12"}
+          - {os: ubuntu-24.04, python: "3.10"}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (CPU wheels)
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            # macOS wheels carry no +cpu label (and include the MPS backend)
+            sed 's/+cpu//' training/requirements-ci.txt | grep -v '^--extra-index-url' > requirements-macos.txt
+            pip install -r requirements-macos.txt
+          else
+            pip install -r training/requirements-ci.txt
+          fi
+      - name: training/tests
+        run: python -m pytest -q -rs -p no:cacheprovider training/tests
+
+  # The offline tests of the data scripts (data/tests): no network, nothing written outside a temporary directory.
+  # They need NumPy and PyYAML only (the fingerprint code is imported from training/, which needs no install).
+  data:
+    name: data scripts (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (unpinned, the latest NumPy, PyYAML and pytest for this Python)
+        run: pip install numpy pyyaml pytest
+      - name: data/tests
+        run: python -m pytest -q -rs -p no:cacheprovider data/tests

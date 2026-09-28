@@ -1,0 +1,45 @@
+# A CPU smoke run of the factory in a few minutes: the secrets-code recipe on minimal shapes. It proves the data stage
+# and its leak checks, the rival, three seeds and the control, the operating point and the gate, not a model: on a CPU,
+# with so few steps, the gate refuses the model ("GATE NOT PASSED", exit status 2). That is its documented outcome, and
+# then no model file is made (a release would also need the fingerprints of the specialist's exams, which made-up data
+# do not have). The pii smoke recipe goes on through export, verify and report in about two minutes.
+# On a fresh checkout, `python data/build_smoke_data.py` first writes what it reads (a generated corpus and two made-up
+# credential formats, never used by another recipe). training/tests/test_factory_smoke.py runs it on a generated corpus.
+#
+#   python data/build_smoke_data.py
+#   python -m pbtrain run specialists/secrets-code/recipes/smoke-cpu.yaml
+name: secrets-code-smoke
+version: 0.0.1
+specialist: secrets-code
+task_type: tag
+output_schema:
+  labels: [secret]
+  per_byte: true
+  min_select_recall: 0.05
+data:
+  format: secrets_synthetic
+  path: ${PUREBYTE_DATA}/corpora/smoke-context.bin
+  version: v4
+  split_policy: {unit: corpus_range, seed: 0}
+  n_train: 256
+  n_eval: 64
+  seq_len: 128
+  control: shuffled_spans
+  extra_lines: 2
+  real_neighbors: true
+train:
+  seeds: [0, 1, 2]
+  mode: causal
+  size: mini64
+  steps: 150
+  lr: 0.003
+  batch: 16
+  decide: true
+criteria:
+  written: 2026-09-23
+  prediction: "the pipeline completes; the control stays at ~0"
+  synthetic:
+    - {metric: control_f1, op: "<=", value: 0.10}
+    - {metric: n_seeds, op: ">=", value: 3}
+engine:
+  threads: 1

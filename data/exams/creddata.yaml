@@ -1,0 +1,388 @@
+# CredData (Samsung/CredData): 337 public repositories with every credential-like line labeled by hand. Only the
+# labeled files are downloaded (by FileID, as CredData's own `download_data.py` selects them) and they are OBFUSCATED by
+# CredData's own `obfuscate_creds.py` (real values are replaced; nothing here or in the dataset holds a live credential).
+#
+#   python data/fetch_creddata.py             -> $PUREBYTE_DATA/exams/creddata/CredData/ (checkout + data/ + meta/)
+#                                                 $PUREBYTE_DATA/exams/creddata/split.json
+#   python data/fingerprint_exams.py --set creddata-test --set creddata-dev
+#
+# The split is by repository and is computed EXACTLY like the public scorer, by importing
+# benchmarks/creddata/score.py (seed 20260922, pairs of repositories sorted by positive units, seeded coin). The lists
+# below are what that computation gives for the pinned snapshot; fetch_creddata.py recomputes it and stops if the two
+# ever differ. TEST is never used for training, and operating points are never chosen on it; one release choice was
+# made with TEST scores in view: the released seed of secrets-code 1.0.0 was chosen on code-fp-b while the CredData
+# TEST F1 of its three seeds was known (the runtime's benchmarks/RESULTS.md says so where it happened). DEV may be used
+# for tuning (it is where operating points are chosen), so its fingerprints carry `role: dev` and the training factory
+# decides what to do with them; the context corpora exclude both.
+#
+# Every upstream repository below is also an identity key: none of them may appear in data/sources/*.yaml.
+schema: 1
+kind: exam
+name: creddata
+description: CredData, labelled credential lines in 337 public repositories, split by repository into DEV and TEST.
+sets:
+  - name: creddata-test
+    role: test
+    fingerprint: creddata
+    description: "CredData TEST: the half of the repositories that no released model is trained on (one release choice was made with its scores in view: see the header)."
+    entries:
+      - id: creddata
+        type: git
+        url: https://github.com/Samsung/CredData
+        pin: {commit: c09c0c52fc6dae4ae5438ae69ba486f9f8059f0d}
+        licence: Apache-2.0          # the CredData repository; dataset files keep their upstream licenses
+        partition: test
+        files:
+          - {path: snapshot.json, sha256: 7b5a022c449460a7daf955b9d114e5ce49d7fa73f1f4adb98e7057555e2ce4ee}
+        repos:                        # 168 repositories: CredData repo id, upstream URL, commit
+          - {id: "00408ef6", url: https://github.com/LibreSprite/LibreSprite, commit: 4fc8d5370db0ed7ecad70182b97171a717de7817}
+          - {id: "0064e882", url: https://github.com/microsoft/VFSForGit, commit: ad5cea066758bf5e9b52892fef565b6d19c1f773}
+          - {id: "02dfa7ec", url: https://github.com/arachnys/cabot, commit: eb0b3544f8c8ab2dee4643df191da346a941734f}
+          - {id: "0436af4a", url: https://github.com/git-ecosystem/git-credential-manager, commit: 87b3a1a746ace2a7439c158348c1e649c30958d3}
+          - {id: "057480bf", url: https://github.com/hashcat/hashcat, commit: 58704f926ef38ed667de6b7ddd7676424a90ecfe}
+          - {id: "060d335b", url: https://github.com/paseto-standard/test-vectors, commit: 32d7406591eb022f9eff88abb84106dd9d42c0f2}
+          - {id: "07715e92", url: https://github.com/scalikejdbc/scalikejdbc, commit: 396167c9d3d25b4ea6b69bf530b6fe1a773e022e}
+          - {id: "08295bf0", url: https://github.com/tpolecat/skunk, commit: 186096d9272a8a21614c99eab8e76a87aac5225d}
+          - {id: "0b0a8cd6", url: https://github.com/tgbot-collection/YYeTsBot, commit: 2eefab8fe4acc17244227d7e107af2c641d16f3c}
+          - {id: "10e03406", url: https://github.com/rancher/rancher, commit: f05e87317d8257dcd7c327c1a5450285a214fd9b}
+          - {id: "11774e78", url: https://github.com/zardus/ctf-tools, commit: 1f03b1127b9f2a5df7a4aa6a2e6af73de120b47e}
+          - {id: "177cf0f9", url: https://github.com/XTLS/Xray-core, commit: 1e3d739a5bcdccc1d27fa2b5c52bd64d9c995a1b}
+          - {id: "1ce69180", url: https://github.com/sferik/twitter, commit: 97f075aadd405427ba3cb5801feb67bdd1af77ef}
+          - {id: "1e007c58", url: https://github.com/nntaoli-project/goex, commit: f4183aaa646d6f0f208d3dc8c22323cfff1f518f}
+          - {id: "1fd3645c", url: https://github.com/python273/vk_api, commit: d7f0462fdae67b99dc7bc0d6b06cdecc568f721b}
+          - {id: "20b9d2a4", url: https://github.com/rabbitmq/rabbitmq-tutorials, commit: a0b077109860bfb94684d2693d1b0a7d906308fb}
+          - {id: "21867a14", url: https://github.com/kivy/python-for-android, commit: 5a51f2b30cfd3c8902b331317eaa1c538b576207}
+          - {id: "22548287", url: https://github.com/DefactoSoftware/Hours, commit: d6951405186bbb91ad392b7646a9fd56b8ed1867}
+          - {id: "29d5ecae", url: https://github.com/jenkinsci/gitlab-plugin, commit: 28d4603d072b8bf345896d33e01317f6a5043184}
+          - {id: "2c47a91c", url: https://github.com/askmike/gekko, commit: ff5698f1ae6329bab5729f145c35a74161e82bac}
+          - {id: "2e6b3af5", url: https://github.com/scribejava/scribejava, commit: 2706674ddfa7c08a6e4500d4b031bc4a5bd4ff87}
+          - {id: "2e944350", url: https://github.com/thephpleague/oauth2-server, commit: 97dbc97b3b1bc4e613b70cb5e0e07d4b2d9372cc}
+          - {id: "31b2490b", url: https://github.com/AdysTech/CredentialManager, commit: d30cf565f0ec8d20729c72a80ee9ab7fcb4677a2}
+          - {id: "32f5ea73", url: https://github.com/symfony/security-core, commit: f74111bca26a9d54e925a649826d2fea4bd3f112}
+          - {id: "34cb4bc8", url: https://github.com/ThreeMammals/Ocelot, commit: 3ef6abd7465fc77632e4b2d5189fbbf47b457867}
+          - {id: "353ae7fa", url: https://github.com/8treenet/freedom, commit: 81a73d6eb15a836936fce08b7932bbb849bb1d54}
+          - {id: "35c273e2", url: https://github.com/microsoft/Git-Credential-Manager-for-Mac-and-Linux, commit: ba7264c4baee703c94017a2b3bc2fcb7327e033e}
+          - {id: "36b76643", url: https://github.com/netlify/gocommerce, commit: dc9c73c3ef9f46d6f0f3e6867094b4746242d384}
+          - {id: "3808df46", url: https://github.com/eshengsky/iBlog, commit: c5cea74c31a5b5c070a8dba64d514bb04694db22}
+          - {id: "387016a6", url: https://github.com/elastic/elasticsearch, commit: 849b66d4412b9e65fdd4b1df20de091afed8bceb}
+          - {id: "38b1dfe2", url: https://github.com/aio-libs/aiomysql, commit: 0a8af2355562ea961477738d66b3334332447186}
+          - {id: "3adfbe9d", url: https://github.com/logaretm/vee-validate, commit: a54a8d3c21579865baff1c64fed2707f24710164}
+          - {id: "3bc98c93", url: https://github.com/assaf/zombie, commit: e6cf0f81368349392f433c7b5122fb568b9b30b0}
+          - {id: "3d4074a9", url: https://github.com/tweepy/tweepy, commit: 4f278d215e6a6e6442116b6ad2db609433bad298}
+          - {id: "3f5c0c63", url: https://github.com/ziahamza/webui-aria2, commit: dddf776a18b095ac373a22b28135c5dd6858496b}
+          - {id: "4638da2b", url: https://github.com/tymondesigns/jwt-auth, commit: ab00f2d7cce5f043067aef7849cdc792de2df635}
+          - {id: "46a1f50f", url: https://github.com/heroku/legacy-cli, commit: 6f18521a258394bfb79e6b36f7160ad8559a8e16}
+          - {id: "4764adaf", url: https://github.com/formio/formio, commit: 86cd6ac13bd958f1d0163e7123f1e10c9ac87111}
+          - {id: "489fc16c", url: https://github.com/jcalazan/ansible-django-stack, commit: c0d9373885e02c16af112dc69336b556e1e20b54}
+          - {id: "48fd3902", url: https://github.com/cloudfoundry/credhub, commit: 262e02dd2f29dc37d7e01b1445d95ef953fc332d}
+          - {id: "4997f5e1", url: https://github.com/typeorm/typeorm, commit: ff28aad27958ef7763a305982f70caeb611f2448}
+          - {id: "49da6f24", url: https://github.com/TechnoAyanOfficial/TechnoAyanBOT, commit: 352822cacce1345e12835164148650b0afa1d124}
+          - {id: "4a099ada", url: https://github.com/open-falcon/falcon-plus, commit: 0a3e2f7e932d1d56578c8dbef0cc349cf997f8f3}
+          - {id: "4aaa1466", url: https://github.com/GantMan/ReactStateMuseum, commit: 130e12bf401f292350e105bc7358b65a362d6ea2}
+          - {id: "4ac7004a", url: https://github.com/googlearchive/android-credentials, commit: b16282a49f3ce3977f326ad697bdd19d28bd66af}
+          - {id: "4b217473", url: https://github.com/boardgameio/boardgame.io, commit: 5ac35302ee80626d0bf50a451472bbfc127cf696}
+          - {id: "4bd9eea8", url: https://github.com/llldddbbb/dbblog, commit: 4de7c712fc146a7ecf694d8ebfdb3d17ef7c8e56}
+          - {id: "4db30bbe", url: https://github.com/vitessio/vitess, commit: e6ab2daaf64df67c609c5b3c9203060448f480c4}
+          - {id: "4dccc5be", url: https://github.com/backup/backup, commit: b9e01da6d29264b147c19f98204f75859a680a6f}
+          - {id: "4f40bf46", url: https://github.com/hussien89aa/KotlinUdemy, commit: 29056bcd11c9c22b063370acc20876fa4c77cf30}
+          - {id: "4fe048e4", url: https://github.com/postalhq/postal, commit: a735219783127cd0495246ccee89422069da1a1c}
+          - {id: "50103f59", url: https://github.com/fossasia/pslab-webapp, commit: 624e56fcae939b11e4e671e0fbde816a9e17162c}
+          - {id: "50595139", url: https://github.com/ZipArchive/ZipArchive, commit: 825ff12a74a94c54e737e279604c27e6740e8a2c}
+          - {id: "50b38ef0", url: https://github.com/balderdashy/sails, commit: d4928254d9bf77fe0d6104cf57f1c56852ce1962}
+          - {id: "528ba141", url: https://github.com/basecamp/pow, commit: 56d5214055947db83e2f82a9a16175cf63c15cdf}
+          - {id: "533c47c6", url: https://github.com/paramiko/paramiko, commit: d2d3d77395d1079a2e335080b7f9f79d3f70ad2a}
+          - {id: "54f6f35d", url: https://github.com/kataras/iris, commit: 8f9140b705011eea9a7344466362662f3106cd69}
+          - {id: "5504e505", url: https://github.com/sferik/t, commit: d8b549fc1c78427f16de31a75d0f56cbca32536d}
+          - {id: "55aa4858", url: https://github.com/YeDaxia/JApiDocs, commit: 8511504446d5e5d0432f6e0645ea58618abdf527}
+          - {id: "55f8a676", url: https://github.com/vitalysim/Awesome-Hacking-Resources, commit: efd320adaca71cfe78efab92894c2bbaf48d685b}
+          - {id: "57154bcf", url: https://github.com/doorkeeper-gem/doorkeeper, commit: e2d11ccf42755362101156c67eade52f2a4e747b}
+          - {id: "58ad6cb0", url: https://github.com/beyondcode/laravel-credentials, commit: 417c66e14a924b3e71241e03b001d15be2d9804a}
+          - {id: "59013d3f", url: https://github.com/elastic/terraform-provider-elasticstack, commit: da908df64ade81d65130b92038bc84866eefeef5}
+          - {id: "5cb346c3", url: https://github.com/otya128/winevdm, commit: eeb29ba4b693110b0732cfd7497c08a7255a58d4}
+          - {id: "5f75c372", url: https://github.com/gruntwork-io/terratest, commit: 7e38458132f4537cbeeccbd262fb3f2541ddb259}
+          - {id: "63800a10", url: https://github.com/gilesknap/gphotos-sync, commit: 376fa3a82a76523180f3feb0522a64c47da68cc5}
+          - {id: "6482c382", url: https://github.com/sorry-cypress/sorry-cypress, commit: 10480dbf75544b96ff1fd37e4f7c3baea783361a}
+          - {id: "64c97cb8", url: https://github.com/microsoft/Git-Credential-Manager-for-Windows, commit: 40d49d9791cea8ad07904bdf901610ed5d8268ee}
+          - {id: "660708f3", url: https://github.com/LycheeOrg/Lychee-v3, commit: f78e469b2a2a580926f0abfb88c8fc047d63a6ed}
+          - {id: "6607e641", url: https://github.com/stripe/stripe-cli, commit: c0c9fbd18517852f53c5c08a0f75d121eebb63b8}
+          - {id: "69d49010", url: https://github.com/docker/docker-py, commit: 96c12726fdb9b24e985b4de74d5c82145ccd8185}
+          - {id: "69f42949", url: https://github.com/nandorojo/solito, commit: b414d36ef1db64d3301dbbe035e2db2f9f55f0a4}
+          - {id: "6a132a15", url: https://github.com/github-tools/github, commit: 540813873309d1889aa50e0708f10baf90b08890}
+          - {id: "6ab520fe", url: https://github.com/duo-labs/cloudmapper, commit: c2d8fdc7de614320462a3205ebcabb8e0e927508}
+          - {id: "6ea17253", url: https://github.com/microsoft/winfile, commit: 8995a6e3a72870e750d2b5959e6245884c21a95f}
+          - {id: "71455799", url: https://github.com/cloudskiff/driftctl, commit: 7604577ba78d12fc2f39a38f3792d3bfd2ba22f3}
+          - {id: "72001588", url: https://github.com/scottslowe/learning-tools, commit: bc2b890a4e9b5c43980d1e7a2a17d0ef77f965dd}
+          - {id: "75e7c64d", url: https://github.com/SerpentAI/SerpentAI, commit: 00a487dd088c6ca2528d025f3273c0a796efe210}
+          - {id: "7738e44d", url: https://github.com/timdorr/tesla-api, commit: 89c63a4e530e6b6a1992113b022b390fb8d47a79}
+          - {id: "784d78e8", url: https://github.com/easzlab/kubeasz, commit: a11f714d9484cb578815445b952a2f145a46cf91}
+          - {id: "793e12f9", url: https://github.com/lostisland/faraday, commit: 830b696ae7cbcdcaafe78deed7104e34792e5826}
+          - {id: "798d34aa", url: https://github.com/juicycleff/ultimate-backend, commit: 70944b3ac086b7c94a92e6a6051807479c4384fa}
+          - {id: "7ba140d7", url: https://github.com/benawad/fullstack-graphql-airbnb-clone, commit: 75efa273298c68aecc4c858c5671d48cc75b5e49}
+          - {id: "7f8b28a7", url: https://github.com/slackhq/slack-api-docs, commit: d4c5fca36d163fc2d62d28d49d443fe84dde17a9}
+          - {id: "8035fc42", url: https://github.com/replikativ/datahike, commit: 064d7e97d8d73d02be3952e438d8bdf809cdbcf4}
+          - {id: "80815938", url: https://github.com/meanjs/mean, commit: ed8d04c4cacf305c25a7a13fface589fd80d1d58}
+          - {id: "81cd05d0", url: https://github.com/aws/aws-sdk-java, commit: a6734b23bfaf833435bed2fe648bd0c85a259260}
+          - {id: "826a020b", url: https://github.com/FredrikNoren/ungit, commit: eef7995773c5a4d77f070a916e2b126827dd90df}
+          - {id: "83a072aa", url: https://github.com/drhenner/ror_ecommerce, commit: 23d8d43b2451d4317e6228ba2ba89656f795f9b1}
+          - {id: "850c2319", url: https://github.com/XiaoMi/soar, commit: 6ae5c3f5ed37d9ea9895823c467e7d2a5c273709}
+          - {id: "88a0011f", url: https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet, commit: 92ff41acd74158e513ac7b47f05ec2e802730466}
+          - {id: "891ea546", url: https://github.com/brocaar/chirpstack-network-server, commit: 6e51d2acb3f1f4a24a3bc4d6327f04cc993396ae}
+          - {id: "8acff9ab", url: https://github.com/kraken-php/framework, commit: 439b8a9c0f0ebf4d59dc637edcf8177126c41d1a}
+          - {id: "8c3c80e8", url: https://github.com/candy-chat/candy, commit: 9ac409e3c1082bf6940b3a0974d6b90b8dcbffdc}
+          - {id: "91cfdb2b", url: https://github.com/dotnet/pinvoke, commit: bc93e82c2208023ac142acb6a2a26ca3f59fc40a}
+          - {id: "92faccc6", url: https://github.com/square/okio, commit: f3ce7248a4011f37afebb1cfa7fa33034656015e}
+          - {id: "93ff401b", url: https://github.com/nats-io/nats.docs, commit: 6d4e5fb954276a005b8dda2a878afe384f3645c5}
+          - {id: "98800b86", url: https://github.com/spotify/luigi, commit: 45f51bbefb20b970d8b73c06b5ae0818586e0962}
+          - {id: "98a9ba4e", url: https://github.com/goldfishh/chatgpt-tool-hub, commit: d294f16426a93c40c79cfb6ca3215648b8549ae4}
+          - {id: "9bc5ca9e", url: https://github.com/spotify/docker-client, commit: 14c955c0524233639fe76a35edda3d620037a525}
+          - {id: "9ccb72ee", url: https://github.com/rest-client/rest-client, commit: 2c72a2e77e2e87d25ff38feba0cf048d51bd5eca}
+          - {id: "9d90ba70", url: https://github.com/coleifer/peewee, commit: 66784c9f2619693e5439ad0b22cd544c10e97440}
+          - {id: "9ef45116", url: https://github.com/zhoutaoo/SpringCloud, commit: d7ebb9e8915d2a4dfc7b0ac8c115a60e12c0d040}
+          - {id: "a0abd87c", url: https://github.com/doraemonext/wechat-python-sdk, commit: bf6f6f3d4a5440feb73a51937059d7feddc335a0}
+          - {id: "a53cc03a", url: https://github.com/cloudtools/troposphere, commit: f5e01ae46eb0c2ddf738f29b0d9b6ca6b284ab29}
+          - {id: "a5c3685e", url: https://github.com/travis-ci/dpl, commit: 85342e2e2ff42d20ad9881a7358788838addaa95}
+          - {id: "ab473e6e", url: https://github.com/shadowsocksr-backup/shadowsocksr, commit: 1ee344220afce9c8b2d031830d23bc6d8849c39c}
+          - {id: "ac9be8d9", url: https://github.com/phoenixframework/phoenix, commit: d3139b3bbd3a04b9c95ba9b81a238d09f334c34b}
+          - {id: "adf34139", url: https://github.com/ArchiveBox/ArchiveBox, commit: e0a2b2e2520c62c5a30a53418e84cd225c63087b}
+          - {id: "b133f43d", url: https://github.com/geerlingguy/ansible-for-devops, commit: 6d4850459664f0395fabfa9d456c8067dcb67d98}
+          - {id: "b356a0cd", url: https://github.com/kubernetes/git-sync, commit: 2abd898038aa362391856f91fd4f5abe33e1e88a}
+          - {id: "b52fff52", url: https://github.com/Meituan-Dianping/mpvue, commit: 6c5d78ee04f58c6d782c456dfcf0fe63c0b7f89b}
+          - {id: "b6263275", url: https://github.com/threedr3am/learnjavabug, commit: 04790a2ed2ec7a3a6eadb55004b5aa499bc8a75d}
+          - {id: "b6a0ac3d", url: https://github.com/databricks/click, commit: f5caeba1aed8490f033de0d348a75f309a11da23}
+          - {id: "b6dbde6a", url: https://github.com/docker/build-push-action, commit: 779802e2ee6be8ce955113a167e04897dd1beed4}
+          - {id: "b81d3227", url: https://github.com/Mastercard/client-encryption-java, commit: 4142a0a0c41354b0d74530539feda74a9a2e9b8b}
+          - {id: "b8d8b8c3", url: https://github.com/wtforms/wtforms, commit: a55be54c0b8487f81e8c0f61279818ada0bd2075}
+          - {id: "b91cad30", url: https://github.com/xkcoding/spring-boot-demo, commit: 71bd673772fba3e18105041284a7fe42933c1377}
+          - {id: "bbb4193f", url: https://github.com/alibaba/canal, commit: 474063af3b51c86b173bd6753ff98727aca1e44a}
+          - {id: "bcb18a48", url: https://github.com/vueComponent/ant-design-vue-pro, commit: 44a9ee06748e9b18d611e6c8471b395f864de70a}
+          - {id: "bdaf1007", url: https://github.com/zboxfs/zbox, commit: 5951899a9b778121f7c6fde89b00e28102e0e596}
+          - {id: "bdf8ad40", url: https://github.com/eddycjy/go-gin-example, commit: 28f372bf41f9e67a9cec5980fd1c365363064ebc}
+          - {id: "c2127ffb", url: https://github.com/welkinwong/nodercms, commit: 8f2f0c70e4459283b72b7183167c5cd4779de936}
+          - {id: "c25fb835", url: https://github.com/wardviaene/kubernetes-course, commit: f5c7d31ee7d9b5480dbbd82d48f95785ee193378}
+          - {id: "c2d95db7", url: https://github.com/laradock/laradock, commit: 3d57064466e3232cecc6c47ebdf9ca164b8773c3}
+          - {id: "c2eb9e71", url: https://github.com/mail-in-a-box/mailinabox, commit: 35fa3fe891574ce43705cec39c5b5e48cd4172ea}
+          - {id: "c41bb134", url: https://github.com/PostgREST/postgrest, commit: 1b12b112a1e491f51e48e37d5d828e4a390de26b}
+          - {id: "c8aa9b49", url: https://github.com/ohmyzsh/ohmyzsh, commit: 706b2f3765d41bee2853b17724888d1a3f6f00d9}
+          - {id: "c8acf322", url: https://github.com/Sorcery/sorcery, commit: 829683b4bffc321d5c8940e00dcf545c2d2c04b6}
+          - {id: "c8c48c5e", url: https://github.com/nextauthjs/next-auth, commit: 8ff7dbb18f07ecf3fc0075725014279c45402208}
+          - {id: "c9201a51", url: https://github.com/bitly/oauth2_proxy, commit: fa2771998a98a5bfdfa3c3503757668ac4f1c8ec}
+          - {id: "c9b945fa", url: https://github.com/requests/requests-oauthlib, commit: 46f886ccb74652fc9c850ece960edcf2bce765a5}
+          - {id: "cba49987", url: https://github.com/iterative/dvc, commit: 3ca18cb400ddf916b996fb140c02c1509b8f37b2}
+          - {id: "cc268724", url: https://github.com/prometheus-community/helm-charts, commit: 50b719af447594abbae7beeb4d6458a19f8e9689}
+          - {id: "cecc6b48", url: https://github.com/yinxin630/fiora, commit: 72c21a8a19a4e6d0329a9be1919ecc15eb9cd3c7}
+          - {id: "d0125de6", url: https://github.com/github/codeql, commit: 4f4cdf434b1256f62e36f2069772d1dd4e16bb82}
+          - {id: "d2926eb1", url: https://github.com/elunez/eladmin, commit: 48dff8611166038c7a8172e60dd42ef09832786d}
+          - {id: "d2d68c6f", url: https://github.com/sourcerer-io/sourcerer-app, commit: af3d7737ba20ccd4734546b03defae10f6627573}
+          - {id: "d518da13", url: https://github.com/pydanny/cookiecutter-django, commit: 0adf0d0423865c5ccc5e3ef3c66d427b58109eef}
+          - {id: "d93c01fb", url: https://github.com/dokku/dokku, commit: 8f56787bf1560112668576b44174df927c429c8b}
+          - {id: "db832824", url: https://github.com/graphql-java/graphql-java, commit: ba39be3b89d568ddd85997089b1c3dd423b4e52a}
+          - {id: "de1c0bce", url: https://github.com/pion/webrtc, commit: f7f760f8c6e2f1aba1bf7c544fdd84d70f6e05b6}
+          - {id: "e097ae9a", url: https://github.com/github/super-linter, commit: 20eb23161153b3532f14da83fe74dedd628fd29b}
+          - {id: "e13d78bf", url: https://github.com/curl/curl, commit: 68720b4837284335b2d63cb358f8f6ce65f5bc55}
+          - {id: "e2d958cd", url: https://github.com/Panuon/PanuonUI.Silver, commit: 14eb1e10c93a67d962ef242d2f22ba6ccf004993}
+          - {id: "e3377359", url: https://github.com/fecshop/yii2_fecshop, commit: a230a87f8e60d2d8a8f7aafafd687a5e8e991bb0}
+          - {id: "e3c63910", url: https://github.com/rest-assured/rest-assured, commit: 4eeb3d82b1d4672787b57ca45167a63085c8c1f1}
+          - {id: "e3f8c305", url: https://github.com/containrrr/watchtower, commit: b196629d0491fa5c5b81b5e95dcdefbb2d82e711}
+          - {id: "e4d4b33d", url: https://github.com/mysqljs/mysql, commit: 3430c513d6b0ca279fb7c79b210c9301e9315658}
+          - {id: "e5a9c76d", url: https://github.com/k1LoW/awspec, commit: 69eb523933cde63ee03ea03807673872c30ea3b7}
+          - {id: "e69fe1b9", url: https://github.com/mailgun/mailgun-ruby, commit: 13fd97fe214fa9de854b76861f809f35d9959119}
+          - {id: "e72eb979", url: https://github.com/WebKit/WebKit, commit: 4042ee4bdf7f6adf5231184b578723dcad1d008a}
+          - {id: "ec138349", url: https://github.com/spring-projects/spring-security-oauth, commit: 265ee115a74cb1eb141b2902e31e3897ba9f73a0}
+          - {id: "ec869dbc", url: https://github.com/byt3bl33d3r/CrackMapExec, commit: 215c479957ee0720fe0b47f4b982d464abcac2be}
+          - {id: "f06251db", url: https://github.com/alibaba/Sentinel, commit: f972b103db7ac650adef235de704dc44dd782bcb}
+          - {id: "f129be24", url: https://github.com/postmanlabs/har-to-postman, commit: 0c418df659611b4e13a1071dae8c900cc6c3a58d}
+          - {id: "f295f04f", url: https://github.com/request/request, commit: 3c0cddc7c8eb60b470e9519da85896ed7ee0081e}
+          - {id: "f37dd3b3", url: https://github.com/thx/rap2-delos, commit: 80fdcff6c157741ec78a16333173c3d506f8b985}
+          - {id: "f5e5719b", url: https://github.com/lucas-clemente/quic-go, commit: af3e1008ad94c64d5a60d1d7b2ddc579bca4ca79}
+          - {id: "f710ac3c", url: https://github.com/django/django, commit: faba5b702a9c5bb9452a543100928bcb5f66ebcf}
+          - {id: "f7ae636a", url: https://github.com/StackExchange/blackbox, commit: b520eb04a492de7762e80ce39bab2e6b211f3ff6}
+          - {id: "f80c571b", url: https://github.com/elastic/rally, commit: dc66d00dd6b8a8ed38515b2e82701c4be098fcbb}
+          - {id: "f85f83c9", url: https://github.com/tumobi/nideshop, commit: 706252cf689ae82218cf36890d4586e176986066}
+          - {id: "f8f46739", url: https://github.com/OpnTec/bodyapps-web, commit: 569c4e354f3112470bfb448610d68375fa25150a}
+          - {id: "fc8343f4", url: https://github.com/kubernetes/kubernetes, commit: bbdcee749cb0011f933b05557672401b6b2229ac}
+          - {id: "fdbe07ac", url: https://github.com/github/gh-ost, commit: f19f101610cbaaf67113aa4a1c223b702152dafb}
+          - {id: "ff43ce4d", url: https://github.com/Clear-Bible/ClearDashboard, commit: 3035e343fc23138843c7ecbf1d3200017f29b7d6}
+          - {id: "ffea718f", url: https://github.com/justcoding121/titanium-web-proxy, commit: caa61eed7a315469857c6e946fc786f8d46d4517}
+  - name: creddata-dev
+    role: dev
+    fingerprint: creddata
+    description: "CredData DEV: the other half, for choosing operating points and diagnosing errors."
+    entries:
+      - id: creddata
+        type: git
+        url: https://github.com/Samsung/CredData
+        pin: {commit: c09c0c52fc6dae4ae5438ae69ba486f9f8059f0d}
+        licence: Apache-2.0          # the CredData repository; dataset files keep their upstream licenses
+        partition: dev
+        files:
+          - {path: snapshot.json, sha256: 7b5a022c449460a7daf955b9d114e5ce49d7fa73f1f4adb98e7057555e2ce4ee}
+        repos:                        # 169 repositories: CredData repo id, upstream URL, commit
+          - {id: "0401c075", url: https://github.com/ubisoft/massgate, commit: e244bae38cc2f0380bbb6b609f28168b9617f4c2}
+          - {id: "05357e88", url: https://github.com/gojhonny/CredCrack, commit: 51e220bef41b0cbb2be11e0d39a0326933e5c4b7}
+          - {id: "06dd1bf2", url: https://github.com/grafana/grafana-com-public-clients, commit: 99cdfb14eacbef5965acf5038e800a3852885aae}
+          - {id: "0a0d22aa", url: https://github.com/hoto/jenkins-credentials-decryptor, commit: a52501b9af023b954b4bfa86bbb40c1efe3f8a27}
+          - {id: "0ce78112", url: https://github.com/NullArray/AutoSploit, commit: 9a6a5efac31b488524f9f56f4e2c08f64ec87227}
+          - {id: "0de15ccf", url: https://github.com/aspnet/Security, commit: 26d27d871b7992022c082dc207e3d126e1d9d278}
+          - {id: "0f133e09", url: https://github.com/PyGithub/PyGithub, commit: 1265747e992ba7d34a469b6b2f527809f8bf7067}
+          - {id: "0fc802c8", url: https://github.com/kubernetes-sigs/kubespray, commit: ca731dca95de69d41df4900fe9e787910e9ca92c}
+          - {id: "106c7cd2", url: https://github.com/francescomalatesta/laravel-api-boilerplate-jwt, commit: 050a5fb6621a55b391e978243364983ba634ff92}
+          - {id: "110f8d35", url: https://github.com/MyCATApache/Mycat-Server, commit: 483a4b8dbd09cbe3ea00ceddf036c58635073e1f}
+          - {id: "16fc0238", url: https://github.com/feathersjs/feathers, commit: 3f4db68d6700c7d9023ecd17d0d39893f75a19fd}
+          - {id: "1809c1ce", url: https://github.com/wundergraph/cosmo, commit: 958cfb7f89c2ac49eec1f9d5109bf32791e2c01c}
+          - {id: "19d43369", url: https://github.com/GoogleChrome/workbox, commit: f6fb94a9d8b922fdcb758129d94e6d2a959f2167}
+          - {id: "1a2de400", url: https://github.com/grpc-ecosystem/grpc-gateway, commit: 8f7d393f1971fe3159c55f1ffea74f5feef43c8e}
+          - {id: "1ca5e942", url: https://github.com/predis/predis, commit: 1d7ccb64ab689a5330e9e0940f4057d42342c991}
+          - {id: "1d8ec728", url: https://github.com/composer/composer, commit: 9a32bf9709960017f944753c68ab05c8de94add0}
+          - {id: "1dc6a932", url: https://github.com/lightos/credmap, commit: d86224760db6745b11ff4428191a39d262d5aafa}
+          - {id: "1fb36b4f", url: https://github.com/an-tao/drogon, commit: a70a2844b1aba63643801c26c35cc0a68b03a8c1}
+          - {id: "2035b073", url: https://github.com/scwuaptx/CTF, commit: 74ab067c5cc3015d1f522e60446d3711846ef781}
+          - {id: "234978d9", url: https://github.com/99designs/aws-vault, commit: 431834922da00ea11fa6ddc5ceda8262bf1a73b9}
+          - {id: "23689bd1", url: https://github.com/panva/jose, commit: e431c508f55c876627beb27b499888d869bf4aa3}
+          - {id: "255bae6f", url: https://github.com/huginn/huginn, commit: f3c91515f2d672c6595521f84a49985a6c9d8c38}
+          - {id: "262e8107", url: https://github.com/anthropics/claude-cookbooks, commit: da66348a4f74e5561401bb021ba779c797207660}
+          - {id: "271c71d8", url: https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools, commit: 6ec740f644f4c5ec9958bc5e037f449af3af7bc1}
+          - {id: "28728ab4", url: https://github.com/go-acme/lego, commit: 190b38c76a806c277059da0850737bf22379229d}
+          - {id: "288eaba8", url: https://github.com/knex/knex, commit: fff6eb15d7088d4198650a2c6e673dedaf3b8f36}
+          - {id: "29f21fc2", url: https://github.com/commonsguy/cw-android, commit: 568c11f2b9b556027dda05ad7b62c044f039b4e4}
+          - {id: "2ba83c6a", url: https://github.com/openssl/openssl, commit: 95c8a5125207a62362345d85be77531ad9654edd}
+          - {id: "2cca776b", url: https://github.com/sherlock-project/sherlock, commit: 829cac07c8e155cc1844dc3a069dcf9283abf603}
+          - {id: "2df212a2", url: https://github.com/boto/boto3, commit: ee51177d30b40d29e60916adf56ef96e1b0d80f6}
+          - {id: "2e665fa9", url: https://github.com/deepstreamIO/deepstream.io, commit: 2aeb844e677437b7d1c9a5ad1e467378f6c25cc0}
+          - {id: "30201159", url: https://github.com/tweetstream/tweetstream, commit: cae45e7e805157767141845d35a88c6e76b99192}
+          - {id: "31423103", url: https://github.com/sahat/hackathon-starter, commit: 53e1ead2b52af28b385ee5ae2b144bca0fd80732}
+          - {id: "339ca0ed", url: https://github.com/florisboard/florisboard, commit: 37bb4cea43b2cca453a59da3076908c02e9b7224}
+          - {id: "349ac2b1", url: https://github.com/heartcombo/devise, commit: c82e4cf47b02002b2fd7ca31d441cf1043fc634c}
+          - {id: "369d561d", url: https://github.com/redisson/redisson, commit: e223321de9e3ad9214722d044c2212733ed06000}
+          - {id: "36d0fbbb", url: https://github.com/LonamiWebs/Telethon, commit: 6b53d45ce27510335f5f33db510a4ee4e3a29a91}
+          - {id: "371ea6d8", url: https://github.com/mailgun/mailgun-php, commit: ae9ee585a27206c759a5d3a830a1d981ddb634a5}
+          - {id: "372310b3", url: https://github.com/wuyouzhuguli/SpringAll, commit: 614d2578d9495acf53cc02f2dee9c6131cc5e51a}
+          - {id: "389fd795", url: https://github.com/google/go-github, commit: edaee9aa26ea0b2fedd961398433b8940b2afef1}
+          - {id: "39def7b4", url: https://github.com/twilio/twilio-ruby, commit: d58fb8d7382c1a452bf67f1efbd3dc53415f811b}
+          - {id: "3b7cbdd3", url: https://github.com/encode/starlette, commit: b6f3578bb2cf6c60e3efe110143409b47f368d36}
+          - {id: "3d82970b", url: https://github.com/auth0/node-jsonwebtoken, commit: 74d5719bd03993fcf71e3b176621f133eb6138c0}
+          - {id: "41659445", url: https://github.com/yeojz/otplib, commit: 147e67637377196e3c59cf93b12ac325aca76fac}
+          - {id: "41d10ede", url: https://github.com/dbcli/pgcli, commit: e0a4c18c4a074016beef46886b03e456102e2db1}
+          - {id: "43e1f4ea", url: https://github.com/testcontainers/testcontainers-java, commit: 9a8df79f847dbcca833680e69f8b4ea1ace310bf}
+          - {id: "443086e9", url: https://github.com/aws/credentials-fetcher, commit: c4b093581b696619615574309a9ffb352b11e1a0}
+          - {id: "46c52073", url: https://github.com/kgrzybek/modular-monolith-with-ddd, commit: 37de06228f3f6f49de20a510d5349c784903b01f}
+          - {id: "472d4c24", url: https://github.com/binarylogic/authlogic, commit: 5e0253dcd91ea72c9a5acc5f62590142b7f4bdb4}
+          - {id: "473043a1", url: https://github.com/httpie/httpie, commit: 350f973f705dc996af27d66fe02e03e2f1f99968}
+          - {id: "49b08818", url: https://github.com/NickCarneiro/curlconverter, commit: e06f3aadea4726fce31c2f6fba94d068b9d4b11a}
+          - {id: "49e2a965", url: https://github.com/probot/probot, commit: 9d12a1eb23a536bbc1d164795e98224c6fc5d2d9}
+          - {id: "4a8d3fd4", url: https://github.com/ripple/ripple-client, commit: dc6dbb412a23654a18ccef6b61b8f0c1cdf87250}
+          - {id: "55031e17", url: https://github.com/conan-io/conan, commit: 977a3c581dc93212f0760dc5a343daa04cc2bd8e}
+          - {id: "5641d7dd", url: https://github.com/angular-app/angular-app, commit: 92c579a157968fc160f21f3d7776eb4153e80b1e}
+          - {id: "56a33894", url: https://github.com/MarkerHub/vueblog, commit: c042ee4a37e865c08addc680af26428de7e8ed89}
+          - {id: "57067d8d", url: https://github.com/elasticdog/transcrypt, commit: aea3ff83c7aea95b18e18839d5beb6da29b7548c}
+          - {id: "57c424f8", url: https://github.com/dromara/shenyu, commit: 4d5b944a7b430a8253d0c5b6165467244fd1b525}
+          - {id: "597acaac", url: https://github.com/z-song/laravel-admin, commit: 0ba9c9116178c8c6f2d49cfeed8c819f9a34397e}
+          - {id: "5aefaef8", url: https://github.com/kubernetes/community, commit: cfbbf0d29a8ffa07022df31b145348b5f4f0b9b1}
+          - {id: "5cecf769", url: https://github.com/tensorflow/tensorflow, commit: c17cfbbe0c9ce52719b445d1276fdc0732ec8aee}
+          - {id: "5d8870b3", url: https://github.com/oauthjs/node-oauth2-server.git, commit: bd8b9f00d11eb7d4738564df0c46da5ee59835cd}
+          - {id: "5f25c9ac", url: https://github.com/express-validator/express-validator, commit: f9da949926770f6ca35267973ee6d6823e9c199e}
+          - {id: "5f62aae4", url: https://github.com/flask-admin/flask-admin, commit: c8877df933ed4842e4bb8f2c8e9301c5507a42b4}
+          - {id: "602d34f9", url: https://github.com/JetBrains/Exposed, commit: d59247283dc8c1af019e3e2a8c75c7519d1fdb6d}
+          - {id: "60f9915d", url: https://github.com/olivere/elastic, commit: b80de84b2610432a3cc16f4a73ccfe31f03c02de}
+          - {id: "638eb0c6", url: https://github.com/graphile/postgraphile, commit: 14d3180cc35660e78e0b8162fd027b33d695a6ba}
+          - {id: "653a7746", url: https://github.com/awslabs/git-secrets, commit: 5357e18bc27b42a827b6780564ea873a72ca1f01}
+          - {id: "654956e7", url: https://github.com/github/platform-samples, commit: 9cd70d42d533b4088ec80d2afa42bb3ed80557b6}
+          - {id: "661abd43", url: https://github.com/appleboy/gorush, commit: fbedf3c82b1223cf14abce642f6e3ed2ff1653a6}
+          - {id: "67cb5d24", url: https://github.com/tal-tech/go-zero, commit: 5d86cc2f20a198d410fe94cfdf5d11b3cbfbab8d}
+          - {id: "680ef0c1", url: https://github.com/Shopify/sarama, commit: 03b4a4f7a346ee383edea231dba53f005ca63a9c}
+          - {id: "693d8e64", url: https://github.com/node-pinus/pinus, commit: 234be76def1813d826494ffecb9204942aa1b314}
+          - {id: "6aae1316", url: https://github.com/danger/danger, commit: af3d856d5cbaaebf534b853df347373dbd0ee30b}
+          - {id: "6ac1fb2d", url: https://github.com/aws/aws-sdk-php, commit: 855bcaaa4c486fc67447bf17cfbff9ff75341ad7}
+          - {id: "6b03222e", url: https://github.com/flant/shell-operator, commit: 3c2c19fc68765ea17fdc1fe38e94330434aa500d}
+          - {id: "6c73b80a", url: https://github.com/nats-io/nats-server, commit: 59b27a7a7a7a495ee86dfcb2053583ead5633704}
+          - {id: "6d59a88a", url: https://github.com/fabric/fabric, commit: 0f8003afdd3e4a7e660f178106ff5137bf3782bd}
+          - {id: "6e2ed0e4", url: https://github.com/docker/awesome-compose, commit: 0ae9d4cea735b6f73b8aa223325e7d8385ff70e7}
+          - {id: "73ae7ce6", url: https://github.com/dromara/Sa-Token, commit: ecb18f5b45165fc91abda4ae28fa5125f3996d63}
+          - {id: "7529016f", url: https://github.com/camptocamp/terraboard, commit: 3d02c81ffcb3282039da24a0b6b87a778a54351d}
+          - {id: "77a3d7d7", url: https://github.com/jwtk/jjwt, commit: a4130dd1ec5d4bef4b1835927a2a1d966a519109}
+          - {id: "78e5819e", url: https://github.com/tiangolo/full-stack-fastapi-postgresql, commit: 490c554e23343eec0736b06e59b2108fdd057fdc}
+          - {id: "7c7558cf", url: https://github.com/CTFd/CTFd, commit: f3693cffd03d7006ba8fc6159e7e9bc6dca5f13e}
+          - {id: "7e01f352", url: https://github.com/fluent/fluentd, commit: 980425ec8ee967854e91f2aa7371fc9c11a0c640}
+          - {id: "7f0408de", url: https://github.com/judasn/Linux-Tutorial, commit: 955ff70778c388c807eaf51eb29ae5cfbb75eb60}
+          - {id: "81a41883", url: https://github.com/Shopify/shipit-engine, commit: c50c4a400c543dcd738c88d1d56f52006fb597eb}
+          - {id: "848ad017", url: https://github.com/sameersbn/docker-gitlab, commit: d860b58fd44ce01b7af82ee3afd9ca612c8b5c72}
+          - {id: "85d2b611", url: https://github.com/NetEaseGame/git-webhook, commit: 4c57f1bfdb4b87183ef4adea30e90dce86fde2fa}
+          - {id: "86050693", url: https://github.com/howtographql/howtographql, commit: 8a5ba66c36c453c82f86f6e2ff7cabd050268018}
+          - {id: "86875835", url: https://github.com/DavideViolante/Angular-Full-Stack, commit: ebece3e0d6d3825e2c8262f6166d3403fd97cb68}
+          - {id: "873d2d8b", url: https://github.com/enquirer/enquirer, commit: 8d626c206733420637660ac7c2098d7de45e8590}
+          - {id: "87e029df", url: https://github.com/lerna/lerna, commit: a47fc294393a3e9507a8207a5a2f07648a524722}
+          - {id: "894e3377", url: https://github.com/phpseclib/phpseclib, commit: b6988f8ced123b20e27c845df66a134f67d1ba1b}
+          - {id: "8ae5e55a", url: https://github.com/vitalets/x-editable, commit: eb7f8d5f7725123edc87c9d66f4c9ddb7b99f1c1}
+          - {id: "8b8452c2", url: https://github.com/dghubble/gologin, commit: 4c2931891636bc0212dbbf5edad7d76dc4cb1365}
+          - {id: "8ba59c91", url: https://github.com/juice-shop/juice-shop, commit: 60f29bc153d42ed8629cf3f30c1de9334294fdeb}
+          - {id: "8bc560cd", url: https://github.com/mdp/rotp, commit: 62874be71d74380d252c73409dd81da08b021497}
+          - {id: "8c9b3ae9", url: https://github.com/JeffLi1993/springboot-learning-example, commit: c47e1c227a49c563d7962ff11cacf42bcf59ddf3}
+          - {id: "8c9fcde7", url: https://github.com/postmanlabs/labs-docs, commit: dd7f344e5b746c5a634922fd8ae67b7261d5e5e4}
+          - {id: "8cda00f3", url: https://github.com/LibertyGlobal/grafana, commit: 240cf63ba6ad8c07a137d1c01f5034ee90422379}
+          - {id: "8d217d6c", url: https://github.com/YOURLS/YOURLS, commit: fd938fd19742e141f95f14ef654d1501bdb63679}
+          - {id: "8d7b8c14", url: https://github.com/perplexityai/api-cookbook, commit: 89c80bbb7e4f62775b77e10ad4f6f48adebd1925}
+          - {id: "8e7a08b0", url: https://github.com/swagger-api/swagger-core, commit: 2695c2e8f6b5f784db753c21cd7a6f2a9799409e}
+          - {id: "8f4427e8", url: https://github.com/hashicorp/terraform-provider-aws, commit: 306993cbf9bb497c272f7890df621a53eb75e3c7}
+          - {id: "8f499d55", url: https://github.com/grafana/tanka, commit: 60775d3573df333d1076a68f165d8c9ff4acd8b3}
+          - {id: "9031b2b4", url: https://github.com/propelorm/Propel2, commit: 150556e8aaec20b9892c4ae27f364a819b1d5fdd}
+          - {id: "9068b102", url: https://github.com/argoproj/gitops-engine, commit: 6911e599aeab4d0f7b3003a81ad01d0612afdb17}
+          - {id: "9069e3a1", url: https://github.com/django-extensions/django-extensions, commit: af38fc5e6f3a3ad28b81d11f6d1104f1ef5daafe}
+          - {id: "90aebe4a", url: https://github.com/brianc/node-postgres, commit: 7667e7c9e730f6bf9e23682cfbd653674f040a67}
+          - {id: "9128de73", url: https://github.com/uswitch/kiam, commit: 7ef6f8b91ccdd659556990b6033ece9a632273e6}
+          - {id: "92f440ce", url: https://github.com/symfony/security, commit: e8b2b12830a4adc51fa71c10459b301ccf4c2633}
+          - {id: "942d502d", url: https://github.com/webdevops/Dockerfile, commit: 40b58cc9c1b21bb4b67d22b474b2d82ec56591eb}
+          - {id: "964f9856", url: https://github.com/expressjs/express, commit: 28db2c2c5cf992c897d1fbbc6b119ee02fe32ab1}
+          - {id: "99f9a6ea", url: https://github.com/Shopify/shopify_app, commit: 83865800a274db78950b2235991cc79193231f22}
+          - {id: "9abeea1b", url: https://github.com/angular/protractor, commit: 4bc80d1a459542d883ea9200e4e1f48d265d0fda}
+          - {id: "9c7e3662", url: https://github.com/wasp-lang/wasp, commit: 2c417ee1889dbd8bf743bb3edd2fc63b35a5089a}
+          - {id: "a09d9e50", url: https://github.com/elastic/elasticsearch-js, commit: 4933e3b9bec474511233f5a05819e493060a86e2}
+          - {id: "a0cd6261", url: https://github.com/swisskyrepo/PayloadsAllTheThings, commit: ad9c15b82405ba9eed991f9823482c7799d5a2cc}
+          - {id: "a15774b8", url: https://github.com/oracle/docker-images, commit: 636a987c4aeda49df2748ae0ab56442420b3a4ca}
+          - {id: "a59f7e20", url: https://github.com/qibaoguang/Spring-Boot-Reference-Guide, commit: 551191a804084a355232bc214d8211b96dec14c7}
+          - {id: "a60edb87", url: https://github.com/OAI/OpenAPI-Specification, commit: 851a6d18a08dc5700ddd761b6e130318d34e6708}
+          - {id: "a8bdca79", url: https://github.com/justauth/JustAuth, commit: 41559fc95494235471039217ad9c3b3a79d006b7}
+          - {id: "aec12e7f", url: https://github.com/Dreampie/Resty, commit: 9ef059c065d1894c79e7d69c150e588a61eb1cd5}
+          - {id: "afdd01d8", url: https://github.com/Kononnable/typeorm-model-generator, commit: 787ad5fdec6fcd365ebff9465b459e238b7ae231}
+          - {id: "b081551c", url: https://github.com/MagicStack/asyncpg, commit: edefd69b4a0dadd045c83159edd8fc6bc05c276a}
+          - {id: "b42cbed0", url: https://github.com/osresearch/heads, commit: 9339394b699fb1790eea3623d6ad5acf7334297a}
+          - {id: "b6b2487d", url: https://github.com/jitsi/jitsi-meet, commit: 4fc9aed708c58643f5e7c94917a99f662464ff11}
+          - {id: "b74193f1", url: https://github.com/9seconds/mtg, commit: 889ab6c227818e92383a286b0dafc95ccb603a85}
+          - {id: "b76321b2", url: https://github.com/bookshelf/bookshelf, commit: 7704fbc5e83a35357d89458d9269a7e739964296}
+          - {id: "b82c1b9d", url: https://github.com/gobuffalo/buffalo, commit: 22aa4f9b4689f65a8f16affc5ff2dc886e10f4a5}
+          - {id: "b88a4e51", url: https://github.com/jly8866/archer, commit: a85408ae014b2a84f76e8ec0bcc7c5ee0a9af2c1}
+          - {id: "bbb6c1c3", url: https://github.com/pagekit/pagekit, commit: 6fc7aa13653a35c29217d031d8ab09b2a1124f2d}
+          - {id: "bd14e9cf", url: https://github.com/aqzt/kjyw, commit: eb4215d828c74d0b878f021ba698ee3e0a6a7c05}
+          - {id: "bd7bcb9d", url: https://github.com/jasontaylordev/NorthwindTraders, commit: 28e05758d93cb838c68b91d73d8c3f28ceafe42f}
+          - {id: "be221a57", url: https://github.com/sindresorhus/got, commit: bc9e48ae689ceb132a192652f5ff6aeedbb4f56c}
+          - {id: "c145598e", url: https://github.com/yahoo/mysql_perf_analyzer, commit: 94a9292bd4cf07062ec6211e8da9077079db0f79}
+          - {id: "c49fdc37", url: https://github.com/sferik/rails_admin, commit: 7962a19469a709c00f481a50a6d1e7ddd1e37cc6}
+          - {id: "c51ddd1e", url: https://github.com/JKHeadley/rest-hapi, commit: 7f24bb036d3a6576f80960570f5a50f7cb6b02a4}
+          - {id: "c5867a40", url: https://github.com/google/google-authenticator, commit: 51781910ae2bb1abf8ac51b290272f86f3651235}
+          - {id: "cc51a2f0", url: https://github.com/docker-mailserver/docker-mailserver, commit: e7b88d865b161d5ff82edd8f05edffa60f0d1b3c}
+          - {id: "cd82f1a2", url: https://github.com/uber/kraken, commit: 645466cebc466772254310f269060167e13e8cd5}
+          - {id: "cfdcc4f3", url: https://github.com/davestephens/ansible-nas, commit: f08dbd903add1390a2f84a8db0b5558be5c260d6}
+          - {id: "d111114d", url: https://github.com/NG-ZORRO/ng-zorro-antd, commit: 957d02d76b72ceca1c43a1dffe88b8f90aea0b45}
+          - {id: "d2d6eedc", url: https://github.com/jaeles-project/jaeles, commit: 66b4635842550283a59580f8765daf5c653e5c16}
+          - {id: "d94d550a", url: https://github.com/pennersr/django-allauth, commit: c50a30acc0e4553297b0ddb697d55a290ed6d038}
+          - {id: "db218f09", url: https://github.com/aws/chalice, commit: bd6e2a29f1bc23e56c8cd35612e2567764e5085e}
+          - {id: "df70e863", url: https://github.com/cli/cli, commit: 75abeb13a836cbf3faf43a2af12a8f1206787b4d}
+          - {id: "dfbda726", url: https://github.com/joemccann/dillinger, commit: e1ccce67acc60ee97732c4e863d1b7fcce94f604}
+          - {id: "e08ff555", url: https://github.com/postmanlabs/postman-collection-transformer, commit: 724d6b35a6d36a618da1e095c84780bfea177377}
+          - {id: "e0b41e26", url: https://github.com/plotly/falcon, commit: 843628318423364073d8488b0fbc9cec0b1ecc92}
+          - {id: "e3a13e23", url: https://github.com/tipsy/javalin, commit: 14af98f4360677e6127253bcf0cd8cdaef30eee7}
+          - {id: "e411c101", url: https://github.com/xuwujing/springBoot-study, commit: 784c4663f5c72e4c2790fb071489e5ed42c8aaca}
+          - {id: "e51ae6e8", url: https://github.com/tomakehurst/wiremock, commit: c64957ea9be7d18893fcc4f04e643d8f7ec68554}
+          - {id: "e9bab109", url: https://github.com/ent/ent, commit: 7428167a14466dee785d8bdcf57aae0026a3a16b}
+          - {id: "eab0f8ed", url: https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers, commit: 17b82420c9c3482e17a5a0d95ba4ab66fce9c42c}
+          - {id: "eb8448ad", url: https://github.com/api-platform/api-platform, commit: d059b22b4e3b4e2a6e30d7ca3c2921145a367e3f}
+          - {id: "eb9ba732", url: https://github.com/aelsabbahy/goss, commit: 6e5d3e37bb1facb315fa9f49b523b7e41496dfa8}
+          - {id: "ef35cd4d", url: https://github.com/PowerShell/PSScriptAnalyzer, commit: 06f94fb84008902fcf540dbd31839ab3348078b8}
+          - {id: "efb4b495", url: https://github.com/xo/usql, commit: ff6a33d39fc8fd768774a474131e6b37e7ad6924}
+          - {id: "eff6e29a", url: https://github.com/thomseddon/traefik-forward-auth, commit: 4ffb6593d569801cf7c4571542c0ff03afcb1a0f}
+          - {id: "f008dd40", url: https://github.com/authelia/authelia, commit: 50878b1e7f0c7786777e0070e6652ca1c35d7567}
+          - {id: "f43ddbf5", url: https://github.com/kelektiv/node.bcrypt.js, commit: d98e2ae8f8f6c5b62d8bedec6f2ab0aa49ea6639}
+          - {id: "f4d22962", url: https://github.com/zzzprojects/EntityFramework.Extended, commit: 68876b0464ab6190815fb9d8b1bbb9b4d114a2d7}
+          - {id: "f623c7b3", url: https://github.com/tornadoweb/tornado, commit: a9fbbeeec9abfe9ff54365160ce476ba853ba203}
+          - {id: "fa71ac83", url: https://github.com/cnodejs/nodeclub, commit: 82db4a569d472758bb2cac6630b979f5eb1c5bd4}
+          - {id: "fd501154", url: https://github.com/karmada-io/karmada, commit: b9ca6606eeb77e901442b9636f7b8e3993826613}
+          - {id: "fec1969a", url: https://github.com/rethinkdb/horizon, commit: c1fa8bdd199979a706d0dc7665c415c4859119eb}
+          - {id: "ff527e6f", url: https://github.com/jazzband/django-admin2, commit: 8cee4de75d073a5c57d778929b5e63c2254d8e36}

@@ -1,0 +1,56 @@
+name: Bug report
+description: Something in pbtrain, a specialist's recipe or generator, or a data script does not work as documented.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug.
+
+        **Never paste real credentials or real personal data** in this form, not even from a public dataset: replace
+        them with look-alike values. Security vulnerabilities must be reported privately instead, as described in
+        `SECURITY.md`.
+  - type: textarea
+    id: doctor
+    attributes:
+      label: python -m pbtrain doctor
+      description: Its output (it shows versions, devices and what was found, never a value).
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - pbtrain (trainer, factory, export, release)
+        - A specialist (recipe, plugin, generator, evaluation)
+        - A data script
+        - Hardware (CUDA, ROCm, Apple silicon, CPU)
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The command you ran and what you saw. Paste output as text, with every dataset value masked.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: This report contains no real credentials and no real personal data.
+          required: true
+        - label: I searched the existing issues for the same problem.
+          required: false

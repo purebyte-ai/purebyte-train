@@ -1,0 +1,19 @@
+# secrets-bin: finds credentials embedded in compiled binaries (ELF, PE, Mach-O, jars, firmware). See README.md.
+name: secrets-bin
+public_name: secrets-bin
+description: credentials embedded in compiled binaries
+uses: [secrets-code]               # the same `secrets_synthetic` generator, in binary mode (nul_separator, bare_value...)
+export:
+  profile: secrets-binary
+  labels: [secret]
+  window: {size: 512, stride: 384}
+  ngram_bits: 4                    # the n-gram memory at 4 bits: 193.8 -> 28.8 MiB, exact on every checked window
+  license: other                   # informative `general.license*` keys (MODEL_LICENSE.md)
+  license_name: PureByte Model License
+release:
+  ensemble: 1                      # one model: a jury of three did not generalize out of sample
+  vote: 1
+exams:
+  - bin-fp-a                      # real shared objects with no credentials (false alarms)
+  - bin-fp-b                      # ELF + PE collection (false alarms, clean count)
+  - bin-fp-c                   # unseen binary families (false alarms, clean count)

@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/purebyte-ai/purebyte-train/security/advisories/new
+    about: Please report vulnerabilities privately, never as public issues.
+  - name: A false positive or a miss of a released specialist
+    url: https://github.com/purebyte-ai/purebyte/issues/new?template=false_result.yml
+    about: Reported with the runtime's form for false results (masked snippets only, never a real value).
+  - name: The runtime (engine, CLI, HTTP API, Python package, integrations)
+    url: https://github.com/purebyte-ai/purebyte/issues
+    about: Problems running a model go to the runtime repository.
+  - name: Questions and ideas
+    url: https://github.com/purebyte-ai/purebyte/discussions
+    about: Ask questions and share ideas in the discussions of the runtime repository.

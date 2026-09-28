@@ -1,0 +1,636 @@
+# Real source code and configuration text: the CONTEXT bytes the secrets-code generator injects synthetic credentials
+# into. Built by `python data/build_code_corpus.py` into $PUREBYTE_DATA/corpora/code-context.bin (+ .manifest.json,
+# .index.tsv.gz). Schema: data/README.md.
+#
+# Selection of repositories: permissively licensed, active, public; spread over the languages and configuration formats
+# a secrets scanner meets; none of them is an evaluation repository (data/exams/*.yaml): the identity check refuses the
+# build otherwise. Commits are the default-branch heads of 2026-09-23. Only files up to `file_bytes.max` are ever
+# downloaded (partial clone), and they are read from git objects, never from a checkout.
+schema: 1
+kind: source
+name: code-context
+description: Mixed-language source code and configuration files (text), the context of the secrets-code generator.
+output: corpora/code-context.bin
+builder: build_code_corpus.py
+build:
+  target_mib: 300                 # 300 x 2^20 bytes
+  seed: 0
+  file_bytes: {min: 64, max: 524288}
+  max_nul_bytes: 2                # a file with more NUL bytes is binary, whatever its extension
+  tolerance: 0.03                 # |real share - declared share| per group
+  decile_tolerance: 0.03          # every byte-decile keeps the global mix
+  min_files: 400                  # distinct files per group: a shape is learned from many files, not from bytes
+  skip_dirs: [.git, node_modules, vendor, _vendor, third_party, third-party, dist, build, target, __pycache__,
+              .venv, venv, .tox, site-packages, .next]
+  groups:                         # declared shares (sum 1); a file joins the first group whose names/extensions match
+    python:     {share: 0.14,  ext: [.py]}
+    js_ts:      {share: 0.14,  ext: [.js, .jsx, .ts, .tsx, .mjs, .cjs]}
+    java_kt:    {share: 0.09,  ext: [.java, .kt, .kts, .gradle, .scala]}
+    go_rust:    {share: 0.09,  ext: [.go, .rs]}
+    ruby_php:   {share: 0.07,  ext: [.rb, .php]}
+    c_cpp:      {share: 0.06,  ext: [.c, .h, .cc, .cpp, .hpp]}
+    csharp:     {share: 0.035, ext: [.cs]}
+    yaml_ci:    {share: 0.11,  ext: [.yml, .yaml], names: [Jenkinsfile, .gitlab-ci.yml]}
+    config:     {share: 0.05,  ext: [.properties, .toml, .ini, .cfg, .conf, .env], names: [Procfile, .npmrc, .env]}
+    shell:      {share: 0.05,  ext: [.sh, .bash, .zsh, .fish], names: [Makefile]}
+    infra:      {share: 0.025, ext: [.tf, .tfvars, .dockerfile, .nomad, .hcl], names: [Dockerfile, Vagrantfile]}
+    data:       {share: 0.04,  ext: [.json, .xml]}
+    sql:        {share: 0.01,  ext: [.sql]}
+    powershell: {share: 0.015, ext: [.ps1, .psm1, .psd1]}
+    swift:      {share: 0.01,  ext: [.swift]}
+    lua:        {share: 0.015, ext: [.lua]}
+    perl:       {share: 0.01,  ext: [.pl, .pm, .t]}
+    dart:       {share: 0.01,  ext: [.dart]}
+    elixir:     {share: 0.02,  ext: [.ex, .exs]}
+    groovy:     {share: 0.01,  ext: [.groovy, .gvy]}
+entries:
+  # ---------------------------------------------------------------- Python
+  - id: apache-airflow
+    type: git
+    url: https://github.com/apache/airflow
+    pin: {commit: b171e3eddc10babf7ea7f0cb477d0d657a69634d}
+    licence: Apache-2.0
+  - id: home-assistant-core
+    type: git
+    url: https://github.com/home-assistant/core
+    pin: {commit: 4f0366f3fce5edc5e09f7d2382973a2bf36bda3a}
+    licence: Apache-2.0
+  - id: celery-celery
+    type: git
+    url: https://github.com/celery/celery
+    pin: {commit: eb3dfa3844288ee35c94a08267cc5e075d42b278}
+    licence: BSD-3-Clause
+  - id: sqlalchemy-sqlalchemy
+    type: git
+    url: https://github.com/sqlalchemy/sqlalchemy
+    pin: {commit: 6e870776cbf298b541877af9b6caf73bc86b379e}
+    licence: MIT
+  - id: pallets-flask
+    type: git
+    url: https://github.com/pallets/flask
+    pin: {commit: d73fa1cdcbd8b1465c151db8924ba58b1dd14e35}
+    licence: BSD-3-Clause
+  - id: psf-requests
+    type: git
+    url: https://github.com/psf/requests
+    pin: {commit: 611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60}
+    licence: Apache-2.0
+  - id: pypa-pip
+    type: git
+    url: https://github.com/pypa/pip
+    pin: {commit: 892d13b34a20b3244a05d90622bbb5bf8e7ccf46}
+    licence: MIT
+    take: {exclude: ["src/pip/_vendor/**"]}            # vendored copies of other projects
+  - id: python-poetry-poetry
+    type: git
+    url: https://github.com/python-poetry/poetry
+    pin: {commit: 94b6e35b9091991887aa54feeb3771a86d3bd692}
+    licence: MIT
+  - id: pydantic-pydantic
+    type: git
+    url: https://github.com/pydantic/pydantic
+    pin: {commit: 0384c970e37a59b344e75161eb106ea9996378ba}
+    licence: MIT
+  - id: wagtail-wagtail
+    type: git
+    url: https://github.com/wagtail/wagtail
+    pin: {commit: c86ea005a8877070f407f67f72164137c1b62426}
+    licence: BSD-3-Clause
+  - id: saltstack-salt
+    type: git
+    url: https://github.com/saltstack/salt
+    pin: {commit: f37cdcd1c93f778a84f83b3cc9933cac92d0456b}
+    licence: Apache-2.0
+    take: {exclude: ["salt/ext/**"]}                   # vendored copies of other projects
+  - id: ansible-ansible-lint
+    type: git
+    url: https://github.com/ansible/ansible-lint
+    pin: {commit: e7f397ad6dfa20d274afa17cd7bbedd84ed136f5}
+    licence: MIT
+  # ---------------------------------------------------------------- JavaScript / TypeScript
+  - id: facebook-react
+    type: git
+    url: https://github.com/facebook/react
+    pin: {commit: d083ec1da1e5252abd3ddfdde6dfbc09701a2c51}
+    licence: MIT
+  - id: vercel-next.js
+    type: git
+    url: https://github.com/vercel/next.js
+    pin: {commit: 8ff7f2bd06226f1e11ab4772a3c092f8147b74d2}
+    licence: MIT
+  - id: nestjs-nest
+    type: git
+    url: https://github.com/nestjs/nest
+    pin: {commit: 8ff59f305315209ad91f43321bd8a2350ee5da75}
+    licence: MIT
+  - id: storybookjs-storybook
+    type: git
+    url: https://github.com/storybookjs/storybook
+    pin: {commit: 6d3aa36dc2dbe8ca5815b17b4a9abd10f99bf128}
+    licence: MIT
+  - id: webpack-webpack
+    type: git
+    url: https://github.com/webpack/webpack
+    pin: {commit: 5ee3f7035ba38e83c798064b20b2b1d329ec3683}
+    licence: MIT
+  - id: vitejs-vite
+    type: git
+    url: https://github.com/vitejs/vite
+    pin: {commit: f155b62ceabbaaf71abbf59933968787e3961c56}
+    licence: MIT
+  - id: prettier-prettier
+    type: git
+    url: https://github.com/prettier/prettier
+    pin: {commit: de9ec361d3e2bb8fbc30da34ceaf402d351b5918}
+    licence: MIT
+  - id: eslint-eslint
+    type: git
+    url: https://github.com/eslint/eslint
+    pin: {commit: b95fb6cb335f82a0ccabb0944ac3b89c703bd947}
+    licence: MIT
+  # ---------------------------------------------------------------- Java / Kotlin / Scala / Gradle
+  - id: spring-projects-spring-boot
+    type: git
+    url: https://github.com/spring-projects/spring-boot
+    pin: {commit: adbbf047320013ee42284d6957293aaf75a56ad7}
+    licence: Apache-2.0
+  - id: spring-projects-spring-framework
+    type: git
+    url: https://github.com/spring-projects/spring-framework
+    pin: {commit: bc45a6a511bf739efa6e30cef7942c879df160fe}
+    licence: Apache-2.0
+  - id: apache-kafka
+    type: git
+    url: https://github.com/apache/kafka
+    pin: {commit: 092a8a7de845f3aa0cba2e812db0af087e9133c0}
+    licence: Apache-2.0
+  - id: apache-tomcat
+    type: git
+    url: https://github.com/apache/tomcat
+    pin: {commit: a0c3ab565701fbd4b1f1c05ffb6a912889fbd3c0}
+    licence: Apache-2.0
+  - id: apache-maven
+    type: git
+    url: https://github.com/apache/maven
+    pin: {commit: 2c0cb25eebb63088751e7bc744a2b19039b0dafd}
+    licence: Apache-2.0
+  - id: spring-projects-spring-petclinic
+    type: git
+    url: https://github.com/spring-projects/spring-petclinic
+    pin: {commit: 818c4136ea971c21674525f9053de0d9c7ad8cfe}
+    licence: Apache-2.0
+  - id: ktorio-ktor
+    type: git
+    url: https://github.com/ktorio/ktor
+    pin: {commit: d08fd0382b2acf314b2beb430b66ba148845a892}
+    licence: Apache-2.0
+  - id: kotlin-kotlinx.coroutines
+    type: git
+    url: https://github.com/Kotlin/kotlinx.coroutines
+    pin: {commit: bd2e9a1b90400fb7b2fa4f8731e7d8148799ab73}
+    licence: Apache-2.0
+  - id: scala-scala
+    type: git
+    url: https://github.com/scala/scala
+    pin: {commit: 71440b9225be58c9183a4028af9036dd0fd49673}
+    licence: Apache-2.0
+  - id: playframework-playframework
+    type: git
+    url: https://github.com/playframework/playframework
+    pin: {commit: e1f3c2a92be8aa8b2f853d7d3175955efbe18a1e}
+    licence: Apache-2.0
+  # ---------------------------------------------------------------- Go / Rust
+  - id: prometheus-prometheus
+    type: git
+    url: https://github.com/prometheus/prometheus
+    pin: {commit: 970b878cc775271673e82c029344807f05662ddb}
+    licence: Apache-2.0
+  - id: gohugoio-hugo
+    type: git
+    url: https://github.com/gohugoio/hugo
+    pin: {commit: 09fa49be210071f44326252a436d9e1169820d78}
+    licence: Apache-2.0
+  - id: gin-gonic-gin
+    type: git
+    url: https://github.com/gin-gonic/gin
+    pin: {commit: 3b08cd7235bd5ad2f055aa9e38135f111f6c5926}
+    licence: MIT
+  - id: helm-helm
+    type: git
+    url: https://github.com/helm/helm
+    pin: {commit: d31cd6992fc7858922de6ebe5984a06fd6aa0b80}
+    licence: Apache-2.0
+  - id: etcd-io-etcd
+    type: git
+    url: https://github.com/etcd-io/etcd
+    pin: {commit: b147d754ff7eb459c2c3f68dad6806f92cda2542}
+    licence: Apache-2.0
+  - id: caddyserver-caddy
+    type: git
+    url: https://github.com/caddyserver/caddy
+    pin: {commit: c798d4c23831dc5aff4198519defb78c8dffad9a}
+    licence: Apache-2.0
+  - id: junegunn-fzf
+    type: git
+    url: https://github.com/junegunn/fzf
+    pin: {commit: b1be3a8be1b833ce5b92fbbac11637643d60a046}
+    licence: MIT
+  - id: astral-sh-uv
+    type: git
+    url: https://github.com/astral-sh/uv
+    pin: {commit: 40efebb459c21b1ecafe4787f84cb693e68a9802}
+    licence: Apache-2.0 OR MIT
+  - id: rust-lang-cargo
+    type: git
+    url: https://github.com/rust-lang/cargo
+    pin: {commit: e2f915c85a9d7999621eae1b2d85d6d2e6bb8822}
+    licence: Apache-2.0 OR MIT
+  - id: tokio-rs-tokio
+    type: git
+    url: https://github.com/tokio-rs/tokio
+    pin: {commit: 3930bd182cb18b534a34af86874a427da4a03c45}
+    licence: MIT
+  - id: rust-lang-crates.io
+    type: git
+    url: https://github.com/rust-lang/crates.io
+    pin: {commit: 0ee900a352b1da6c0fc91556ead1e3669031aee0}
+    licence: Apache-2.0 OR MIT
+  - id: burntsushi-ripgrep
+    type: git
+    url: https://github.com/BurntSushi/ripgrep
+    pin: {commit: 3fce3b5bb0236da2df6d99672afb8a719642eca7}
+    licence: MIT OR Unlicense
+  - id: serde-rs-serde
+    type: git
+    url: https://github.com/serde-rs/serde
+    pin: {commit: 6693a89cca77e0151437da1c7f890090b9ebf04c}
+    licence: Apache-2.0 OR MIT
+  # ---------------------------------------------------------------- Ruby / PHP
+  - id: rails-rails
+    type: git
+    url: https://github.com/rails/rails
+    pin: {commit: 2cc9c08699bc8062c0851dab772cbea64affabda}
+    licence: MIT
+  - id: sinatra-sinatra
+    type: git
+    url: https://github.com/sinatra/sinatra
+    pin: {commit: cb22afd7902b566b6eaba6c4ea89739494a65d12}
+    licence: MIT
+  - id: rubocop-rubocop
+    type: git
+    url: https://github.com/rubocop/rubocop
+    pin: {commit: dc1b353473c2fce0bd37e5ef6cead5d9e713095f}
+    licence: MIT
+  - id: jekyll-jekyll
+    type: git
+    url: https://github.com/jekyll/jekyll
+    pin: {commit: 541d8b2ee75c8907de4744d4b87a7a6f1f997cae}
+    licence: MIT
+  - id: chef-chef
+    type: git
+    url: https://github.com/chef/chef
+    pin: {commit: 5c2b413bb5de4664d37c96a1d5971fd493315395}
+    licence: Apache-2.0
+  - id: puppetlabs-puppet
+    type: git
+    url: https://github.com/puppetlabs/puppet
+    pin: {commit: e227c27540975c25aa22d533a52424a9d2fc886a}
+    licence: Apache-2.0
+  - id: laravel-framework
+    type: git
+    url: https://github.com/laravel/framework
+    pin: {commit: 06cdbaea9f1165de0d75ba5f46d781143250ef80}
+    licence: MIT
+  - id: symfony-symfony
+    type: git
+    url: https://github.com/symfony/symfony
+    pin: {commit: 4ab2effa33986244634f5c7fe320b5bdfbf8ee8f}
+    licence: MIT
+  - id: doctrine-orm
+    type: git
+    url: https://github.com/doctrine/orm
+    pin: {commit: 6b47a02cd1d7119ef4d8f90ca6d49651accef1a3}
+    licence: MIT
+  - id: sebastianbergmann-phpunit
+    type: git
+    url: https://github.com/sebastianbergmann/phpunit
+    pin: {commit: 6ac2aeccbb41ea3fe26fc9805deb9b44b74feae4}
+    licence: BSD-3-Clause
+  # ---------------------------------------------------------------- C / C++
+  - id: sqlite-sqlite
+    type: git
+    url: https://github.com/sqlite/sqlite
+    pin: {commit: a8d1f1ff12c2f0f61f3c1a403db83d97ac71f75c}
+    licence: blessing
+  - id: postgres-postgres
+    type: git
+    url: https://github.com/postgres/postgres
+    pin: {commit: 374522aa63af1187c15dd21db0b2c988b55c9a3a}
+    licence: PostgreSQL
+  - id: antirez-sds
+    type: git
+    url: https://github.com/antirez/sds
+    pin: {commit: 5347739b1581fcba74fd5cab1fc21d2aef317d71}
+    licence: BSD-2-Clause
+  - id: jqlang-jq
+    type: git
+    url: https://github.com/jqlang/jq
+    pin: {commit: df24981307658868759faaea76b817cc62dd6be0}
+    licence: MIT
+  - id: libuv-libuv
+    type: git
+    url: https://github.com/libuv/libuv
+    pin: {commit: b05973ed36b2de7ca51a3dca9cfa9160b42fe34d}
+    licence: MIT
+  - id: libexpat-libexpat
+    type: git
+    url: https://github.com/libexpat/libexpat
+    pin: {commit: 628c3a1229d60dc0027dbad6659583673acef168}
+    licence: MIT
+  - id: madler-zlib
+    type: git
+    url: https://github.com/madler/zlib
+    pin: {commit: 767c4c947852e143f582c85f14cf573411df1b35}
+    licence: Zlib
+  - id: davegamble-cjson
+    type: git
+    url: https://github.com/DaveGamble/cJSON
+    pin: {commit: 6d9f2443ab071f86e5d9b43025a40929ec41c46c}
+    licence: MIT
+  - id: redis-hiredis
+    type: git
+    url: https://github.com/redis/hiredis
+    pin: {commit: 058ebcdf36c5b05b759c613564fb958ec363c90f}
+    licence: BSD-3-Clause
+  - id: valkey-io-valkey
+    type: git
+    url: https://github.com/valkey-io/valkey
+    pin: {commit: 77b00b2ddaf1b5cce154313098d3951ea83b155c}
+    licence: BSD-3-Clause
+    take: {exclude: ["deps/**"]}                       # vendored dependencies
+  - id: tmux-tmux
+    type: git
+    url: https://github.com/tmux/tmux
+    pin: {commit: 56373a08eec36035e2d6624f56611efa30d91aa1}
+    licence: ISC
+  # ---------------------------------------------------------------- C#
+  - id: dotnet-aspnetcore
+    type: git
+    url: https://github.com/dotnet/aspnetcore
+    pin: {commit: c6971b1955cd7396de752bf4b6556d802b0aaa4f}
+    licence: MIT
+  - id: jamesnk-newtonsoft.json
+    type: git
+    url: https://github.com/JamesNK/Newtonsoft.Json
+    pin: {commit: 52fa3aef1f2cadcd3a3f874251eddc98d3efbbaa}
+    licence: MIT
+  - id: serilog-serilog
+    type: git
+    url: https://github.com/serilog/serilog
+    pin: {commit: bebc7719004f76187ae72e64ce138ec2540f2070}
+    licence: Apache-2.0
+  # ---------------------------------------------------------------- CI, containers, infrastructure
+  - id: actions-starter-workflows
+    type: git
+    url: https://github.com/actions/starter-workflows
+    pin: {commit: e3c451d60f119b71caebf13c98ac45da6e15b4b7}
+    licence: MIT
+  - id: bitnami-containers
+    type: git
+    url: https://github.com/bitnami/containers
+    pin: {commit: 5fc1a2cc7f62644d69be7855d71a4011ccf2c79c}
+    licence: Apache-2.0
+  - id: bitnami-charts
+    type: git
+    url: https://github.com/bitnami/charts
+    pin: {commit: bd57775ec33ee9780938091f9bc12bf73a921918}
+    licence: Apache-2.0
+  - id: geerlingguy-ansible-role-docker
+    type: git
+    url: https://github.com/geerlingguy/ansible-role-docker
+    pin: {commit: 38be616950679548ae0ba8a81ffcceca1b3090bd}
+    licence: MIT
+  - id: argoproj-argo-cd
+    type: git
+    url: https://github.com/argoproj/argo-cd
+    pin: {commit: 1a76a96359bff35a6a904751915bc138d15df0f4}
+    licence: Apache-2.0
+  - id: googlecloudplatform-microservices-demo
+    type: git
+    url: https://github.com/GoogleCloudPlatform/microservices-demo
+    pin: {commit: 38e7348eb289eb5b87c0c6e8cb19ced0449dc389}
+    licence: Apache-2.0
+  - id: jenkinsci-pipeline-examples
+    type: git
+    url: https://github.com/jenkinsci/pipeline-examples
+    pin: {commit: fb9575a8182b51614f5f0df912b46b37d95fbb8d}
+    licence: MIT
+  - id: terraform-aws-modules-terraform-aws-vpc
+    type: git
+    url: https://github.com/terraform-aws-modules/terraform-aws-vpc
+    pin: {commit: b3abd6df2ecf052451a361ed55b8f06f8742a795}
+    licence: Apache-2.0
+  - id: terraform-aws-modules-terraform-aws-rds
+    type: git
+    url: https://github.com/terraform-aws-modules/terraform-aws-rds
+    pin: {commit: 175da043429cbbe41c512f976105719f6d0e538c}
+    licence: Apache-2.0
+  - id: terraform-google-modules-terraform-google-network
+    type: git
+    url: https://github.com/terraform-google-modules/terraform-google-network
+    pin: {commit: dfe46ddfbe1b99608b19e0a9f3a3b43e0ccb8bff}
+    licence: Apache-2.0
+  - id: docker-library-python
+    type: git
+    url: https://github.com/docker-library/python
+    pin: {commit: 8f2cb2e1c9cae4d8f772fe61f1427c96acea3257}
+    licence: MIT
+  - id: docker-library-postgres
+    type: git
+    url: https://github.com/docker-library/postgres
+    pin: {commit: 4a1f78ff7e7a6e7ecb6a584c540c07946ad66e80}
+    licence: MIT
+  # ---------------------------------------------------------------- Shell
+  - id: bash-it-bash-it
+    type: git
+    url: https://github.com/Bash-it/bash-it
+    pin: {commit: 4725d29db8c0ac8c21df47664b28539f3b8fce94}
+    licence: MIT
+  - id: dylanaraps-pure-bash-bible
+    type: git
+    url: https://github.com/dylanaraps/pure-bash-bible
+    pin: {commit: 8c19d0b482b04d8d50fb72b4c5148b41ce605c6d}
+    licence: MIT
+  - id: nvm-sh-nvm
+    type: git
+    url: https://github.com/nvm-sh/nvm
+    pin: {commit: a885b885fef16fac4bc544188fb25e9e37ae83e8}
+    licence: MIT
+  - id: rbenv-rbenv
+    type: git
+    url: https://github.com/rbenv/rbenv
+    pin: {commit: 07e9b1e297a5977298c6aadc9971ae0e9eb7f0dc}
+    licence: MIT
+  - id: pyenv-pyenv
+    type: git
+    url: https://github.com/pyenv/pyenv
+    pin: {commit: 26370b7f24053edb37da70de942a18a650f0b0c1}
+    licence: MIT
+  - id: asdf-vm-asdf
+    type: git
+    url: https://github.com/asdf-vm/asdf
+    pin: {commit: cb72590e9f9691b6e651aecfe4b0c9334adff41b}
+    licence: MIT
+  - id: holman-dotfiles
+    type: git
+    url: https://github.com/holman/dotfiles
+    pin: {commit: 9a90082b61fa5659789b9d41544c19098825a3ca}
+    licence: MIT
+  - id: zsh-users-zsh-autosuggestions
+    type: git
+    url: https://github.com/zsh-users/zsh-autosuggestions
+    pin: {commit: 85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5}
+    licence: MIT
+  - id: romkatv-powerlevel10k
+    type: git
+    url: https://github.com/romkatv/powerlevel10k
+    pin: {commit: d05a1b00f9a61f9578bf9dc19b8451942dde8734}
+    licence: MIT
+  - id: tj-n
+    type: git
+    url: https://github.com/tj/n
+    pin: {commit: f52d2172f12cd76f0efe9524690723f52ab74f40}
+    licence: MIT
+  # ---------------------------------------------------------------- PowerShell
+  - id: powershell-powershell
+    type: git
+    url: https://github.com/PowerShell/PowerShell
+    pin: {commit: 0817ada8e7b95717fda4483054ee8ed0f1367ac8}
+    licence: MIT
+  - id: pester-pester
+    type: git
+    url: https://github.com/pester/Pester
+    pin: {commit: 98e56d65da1642a7158992b50ded240c42a3ac18}
+    licence: Apache-2.0
+  - id: dataplat-dbatools
+    type: git
+    url: https://github.com/dataplat/dbatools
+    pin: {commit: 3415c1d818d7a9f39011cf66abc8fc6530f3e7aa}
+    licence: MIT
+  # ---------------------------------------------------------------- Swift
+  - id: vapor-vapor
+    type: git
+    url: https://github.com/vapor/vapor
+    pin: {commit: cbe12f91f07c9935daafc15c34afc38b5735ea79}
+    licence: MIT
+  - id: apple-swift-argument-parser
+    type: git
+    url: https://github.com/apple/swift-argument-parser
+    pin: {commit: cdc5f0c6e836de848699ae11f6480f2d99ac5ef1}
+    licence: Apache-2.0
+  - id: apple-swift-nio
+    type: git
+    url: https://github.com/apple/swift-nio
+    pin: {commit: 9cb66c6d7a636fef586a93a15827eb247f1c12e9}
+    licence: Apache-2.0
+  - id: pointfreeco-swift-composable-architecture
+    type: git
+    url: https://github.com/pointfreeco/swift-composable-architecture
+    pin: {commit: 377da4061db10d26337a71bb279c506bb951f50f}
+    licence: MIT
+  # ---------------------------------------------------------------- Lua
+  - id: luarocks-luarocks
+    type: git
+    url: https://github.com/luarocks/luarocks
+    pin: {commit: 2d2cc8eff2f03c23d142f8059146fb241dcf56b5}
+    licence: MIT
+  - id: nvim-lua-plenary.nvim
+    type: git
+    url: https://github.com/nvim-lua/plenary.nvim
+    pin: {commit: 74b06c6c75e4eeb3108ec01852001636d85a932b}
+    licence: MIT
+  - id: kong-kong
+    type: git
+    url: https://github.com/Kong/kong
+    pin: {commit: 94b6c29509f6ff8f4f5326a8c86bc9345cc7248b}
+    licence: Apache-2.0
+  # ---------------------------------------------------------------- Perl
+  - id: mojolicious-mojo
+    type: git
+    url: https://github.com/mojolicious/mojo
+    pin: {commit: 93f591742a7dbc0cee36875ab80a38f0666e32ae}
+    licence: Artistic-2.0
+  - id: mojolicious-minion
+    type: git
+    url: https://github.com/mojolicious/minion
+    pin: {commit: c3626200fd637a26d41e3e2176a9a86b0289188e}
+    licence: Artistic-2.0
+  - id: sqitchers-sqitch
+    type: git
+    url: https://github.com/sqitchers/sqitch
+    pin: {commit: 7cb467d147557267bd16d7e9fe6886ed797253ab}
+    licence: MIT
+  # ---------------------------------------------------------------- Dart
+  - id: dart-lang-pub
+    type: git
+    url: https://github.com/dart-lang/pub
+    pin: {commit: a9ed06f7fb180b39b950aec878d4aa0911b7675e}
+    licence: BSD-3-Clause
+  - id: flutter-samples
+    type: git
+    url: https://github.com/flutter/samples
+    pin: {commit: 8a4cf1db16d52741f0e59e1bfe818723430c35bc}
+    licence: BSD-3-Clause
+  # ---------------------------------------------------------------- Elixir
+  - id: elixir-ecto-ecto
+    type: git
+    url: https://github.com/elixir-ecto/ecto
+    pin: {commit: 24f914a5a7b2cc7f8a67bf667de69b17a2c82d91}
+    licence: Apache-2.0
+  - id: elixir-lang-elixir
+    type: git
+    url: https://github.com/elixir-lang/elixir
+    pin: {commit: 2ea693db95e0f400238ae021a7fa43c0e7cb08f2}
+    licence: Apache-2.0
+  - id: elixir-plug-plug
+    type: git
+    url: https://github.com/elixir-plug/plug
+    pin: {commit: 73404f851852a00ffb2014be95d4598900fa77b8}
+    licence: Apache-2.0
+  - id: elixir-lang-ex_doc
+    type: git
+    url: https://github.com/elixir-lang/ex_doc
+    pin: {commit: 0d0e4c76ac5145d699e630d45b809889869e2f6f}
+    licence: Apache-2.0
+  - id: absinthe-graphql-absinthe
+    type: git
+    url: https://github.com/absinthe-graphql/absinthe
+    pin: {commit: 1372ceb5f8226175050a38821601cd57738c177b}
+    licence: MIT
+  # ---------------------------------------------------------------- Groovy
+  - id: spockframework-spock
+    type: git
+    url: https://github.com/spockframework/spock
+    pin: {commit: 37e5e9a663ac6bc1ed1f72ac8374a81b879c66b0}
+    licence: Apache-2.0
+  - id: apache-groovy
+    type: git
+    url: https://github.com/apache/groovy
+    pin: {commit: 5a130715f3d6171b52a836649c07dc126d7decbe}
+    licence: Apache-2.0
+  # ---------------------------------------------------------------- SQL
+  - id: sqlfluff-sqlfluff
+    type: git
+    url: https://github.com/sqlfluff/sqlfluff
+    pin: {commit: 23ed3ddc05474f6f92b461821f9b9227db9cff38}
+    licence: MIT
+  - id: flyway-flyway
+    type: git
+    url: https://github.com/flyway/flyway
+    pin: {commit: 4e9e435c5f98a62c892dbdaa75def65253622c68}
+    licence: Apache-2.0
+  - id: dbt-labs-dbt-core
+    type: git
+    url: https://github.com/dbt-labs/dbt-core
+    pin: {commit: 1be5be2473d980ec43b0e60586d88d2387686d5b}
+    licence: Apache-2.0

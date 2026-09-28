@@ -1,0 +1,4 @@
+# Paths that `purebyte scan` leaves out when it scans this repository (the runtime's docs/cli.md#ignoring-findings).
+
+# Look-alike credentials made by the training data generator: they are meant to look real.
+specialists/secrets-code/secretsgen/

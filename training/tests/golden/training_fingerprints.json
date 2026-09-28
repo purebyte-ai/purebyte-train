@@ -1,0 +1,123 @@
+{
+ "meta": {
+  "torch": "2.4.1+cpu",
+  "numpy": "2.2.1",
+  "python": "3.10.14",
+  "system": "Windows",
+  "machine": "AMD64",
+  "cpu_capability": "AVX2",
+  "threads": 1,
+  "steps": 20,
+  "source": "the code base the released specialists were trained with (CPU run)"
+ },
+ "cases": {
+  "default": {
+   "sha": "147f39411e1ad694d12d00df3ef14e83743835ad5cadae4d65b22b3f53f1e302",
+   "n_tensors": 28
+  },
+  "seed_1": {
+   "sha": "141e919ad9f9f7d218ffb22dcab353c93e1239e8618e7d27c418d0be94ff632a",
+   "n_tensors": 28
+  },
+  "control_shuffled": {
+   "sha": "38c2e5f5e55eba8e88ed9a645303f0e6b304770e70abd5cdc237f8ba8f812450",
+   "n_tensors": 28
+  },
+  "ngram_tables": {
+   "sha": "7e0390a3c941e021a2a8bde516861b0cf5eb1934de59c825ae8ec75d7fe96e01",
+   "n_tensors": 31
+  },
+  "ngram_heads_2": {
+   "sha": "59426916d2b3e976a42acdb24fe4830a16b1e4593977b3649189402895fccde1",
+   "n_tensors": 33
+  },
+  "ngram_gate_layer1": {
+   "sha": "c207835ac13446c038a976f975cd639b9518673066586d5f9fdea821d14cdb13",
+   "n_tensors": 32
+  },
+  "lookahead_4": {
+   "sha": "120a50a5775cc8e6177fa4c471bb77fa607a4b33a082383d897ec0f91c62ef4a",
+   "n_tensors": 29
+  },
+  "attention_layer1": {
+   "sha": "eb571f52e340a4698df3d1ced55498dcc16a3b6c1852db138c535d503c7d29b4",
+   "n_tensors": 21
+  },
+  "hydra": {
+   "sha": "fdd60cf918ac59e82ee8bf7256ce21c1eaa209d2d07f6a9e4b7071038fdea171",
+   "n_tensors": 28
+  },
+  "bimamba": {
+   "sha": "c6681ae28069f41c77da6406e96ff9afda5f2951d961fcad04ba2c91b59679c5",
+   "n_tensors": 28
+  },
+  "float_control": {
+   "sha": "90b042746c892ad17f036b78448733c922d314cb6ae23efb8610ac9c0039cd9a",
+   "n_tensors": 28
+  },
+  "lr_3e-4_wd_clip": {
+   "sha": "02019c49cbb5e5a83293d47bdf67288e6c9bfc33ebd4a6af42b946bce42066d6",
+   "n_tensors": 28
+  },
+  "out_lr_mult": {
+   "sha": "bd818bafa743c6636b969fd066e31eb66afc116dc38a52f2c06410cb3d09bd0b",
+   "n_tensors": 28
+  },
+  "beta2": {
+   "sha": "b80c96dc3a08ca9632ee42c7bb6411accd51659e3e4718c76aacefffedf647c0",
+   "n_tensors": 28
+  },
+  "init_seed": {
+   "sha": "7ebb52c51ea891566426ac12e7c8558433024a990cd7cc1bb6dd60390f2e267c",
+   "n_tensors": 28
+  },
+  "span_weight": {
+   "sha": "964b158365bd8123f25bb470deb27aaa5a226d1cc71a0f77ab42a95ab6a9f44b",
+   "n_tensors": 28
+  },
+  "real_neg": {
+   "sha": "369336039771645286b19aba4b94bb7b89946fc0362e771b7c7fec2b7c488d7a",
+   "n_tensors": 28
+  },
+  "real_spans": {
+   "sha": "619d119250804c8ab9a8f463161b4d2ed75a28aa1389b3f605cd527c4128a4e6",
+   "n_tensors": 28
+  },
+  "real_spans_control": {
+   "sha": "112fc204442b1f5852d14e4e2626b1cb83978fa4eab6854ed81db1d5290a7b7f",
+   "n_tensors": 28
+  },
+  "real_distill": {
+   "sha": "a1f2400c68f94dbb6c37350a43c814561929b1cf66df8cd1cd0b0af9e887d660",
+   "n_tensors": 28
+  },
+  "guard_select": {
+   "sha": "a068a5cc4a18d3c7badb6d9be6df5e8ee6ccf60e3beb2c945f84176ba6d2ad3b",
+   "n_tensors": 28
+  },
+  "guard_rollback": {
+   "sha": "a9bc620a02169541a862e7a966c02ca3435dfaebce01e075d8be17fe5fbd8f1f",
+   "n_tensors": 28
+  },
+  "base_body": {
+   "sha": "12dad1f93955dd837d1c69cbdfbefec005e4250a24a14b842a1713035a900b79",
+   "n_tensors": 28
+  },
+  "adapter_scales": {
+   "sha": "97f6ac26c72ca51d4f5dce2218b2206020983202eef95e56cf6332db09f07809",
+   "n_tensors": 32
+  },
+  "adapter_lora": {
+   "sha": "2581f9c0b4e614aee7b606caa487cf6943487dcdb1d2c1dc2f4a33bc7dc32135",
+   "n_tensors": 36
+  },
+  "adapter_heads": {
+   "sha": "dd0e1751cca989d2f91b217fdd04a6682d32d41c8ddcbd06d3ee5af5c770bd94",
+   "n_tensors": 28
+  },
+  "ngram_init_frozen": {
+   "sha": "6ff537b6fbcd730cce4d1a879ed49e6047eaab4accaefca79eace8c6e3700089",
+   "n_tensors": 31
+  }
+ }
+}

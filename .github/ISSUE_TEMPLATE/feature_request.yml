@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a new specialist, a data source, a hardware backend or an improvement to the training stack.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. The most useful requests start from a concrete problem and say how you would know it is
+        solved. For a new specialist, say what it reads, what it must find or decide, and on which public data it could
+        be measured.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - A new specialist
+        - A data source
+        - Hardware (CUDA, ROCm, Apple silicon, CPU)
+        - The trainer or the factory
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: What should the training stack do? For a specialist, the success criteria you would write before training.
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to implement this myself (see CONTRIBUTING.md and AGENTS.md).
+          required: false

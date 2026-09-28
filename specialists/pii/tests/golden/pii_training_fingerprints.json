@@ -1,0 +1,32 @@
+{
+ "meta": {
+  "torch": "2.4.1+cpu",
+  "numpy": "2.2.1",
+  "python": "3.10.14",
+  "system": "Windows",
+  "machine": "AMD64",
+  "cpu_capability": "AVX2",
+  "threads": 1,
+  "steps": 20,
+  "ignored_bytes": 100,
+  "source": "the code the released pii model was trained with (CPU run)"
+ },
+ "cases": {
+  "one_type_with_ignore": {
+   "sha": "61ad3e5c55781c1b7c5ceec7d7cf801779fdfa0f5e52eb69b9ec6c2be68fb286",
+   "n_tensors": 28
+  },
+  "one_type_with_ignore_control": {
+   "sha": "e46d8de51436a2d511f509970024d5f09059e44173cea74c7ce2997d8dab1dd7",
+   "n_tensors": 28
+  },
+  "one_type_ngram_tables": {
+   "sha": "b0005a6062d2c7f448a927bc9afe6b5086e9cfdd6f7a2610bdb3872c4131ad8a",
+   "n_tensors": 31
+  },
+  "release_preset_nano_n15": {
+   "sha": "405aadd78cb0a874c8a46fbdea282c195ab0ba1d1c9ec38cc112c2c824e49eb8",
+   "n_tensors": 52
+  }
+ }
+}

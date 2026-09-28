@@ -1,0 +1,84 @@
+# The release pool of the pii specialist: labelled documents of the TRAIN splits of four public PII datasets, with the
+# hard overlap check against every PII evaluation set (build_pii_pool.py, pbdata/pii_pool.py, data/README.md "The PII
+# pool").
+#
+#   python data/build_pii_pool.py   -> $PUREBYTE_DATA/pii/public_train_xl/*.jsonl (387,391 documents, 23 languages)
+#                                      $PUREBYTE_DATA/pii/public_train_clean/base_public_train.jsonl (32,500)
+#
+# The four files are downloaded whole at the pinned revision and verified by sha256 (3.9 GB, 3.7 of them the OpenPII-1M
+# TRAIN file). TRAIN splits only; their test and validation splits are evaluation material (data/exams/pii.yaml), and
+# the PII masking benchmark (CC BY-NC) is never training material. Not used either: the ai4privacy 200k / 300k / 400k /
+# open-500k sets (licences) and privy (the benchmark's privy test is a fork of it).
+#
+# `build.reference_sha256`: the sha256 of each output file (one JSON document per line, LF line ends) of the pool the
+# release was trained with. A build with the default options gives exactly these files, and says so in its manifest.
+#
+# Attribution required by the licences: "Ai4Privacy / Ai Suisse SA OpenPII-1M, CC BY 4.0"; "NVIDIA Nemotron-PII,
+# CC BY 4.0"; "Gretel.ai datasets, Apache 2.0".
+schema: 1
+kind: source
+name: pii-pool
+description: The release pool of the pii specialist - labelled public TRAIN documents in 23 languages, overlap-checked.
+output: pii/public_train_xl/
+builder: build_pii_pool.py
+build:
+  base_manifest: pii.yaml          # its sample (hf entries), drawn from the files below and checked by its reference
+  base_per_source: 12000
+  openpii: {en: 48000, per_language: 7000, oversample: 2.5}
+  min_unit: 40                     # characters of a normalised sentence or line (the exact-unit level)
+  min_masked_unit: 60              # characters of a masked unit holding a placeholder (the masked-unit level)
+  evaluation_sets: [piimb, pii-bench-test, pii-bench-dev]
+  # The documents that the maintainers' own evaluation set (2,000 documents built from their code corpus; not public)
+  # excluded at the exact-unit level, by id and the key of their normalised text (pbdata/pii_pool.py `text_key`): the
+  # public build leaves them out too (reason `listed`), and so gives the release pool without that set.
+  listed_exclusions:
+    - {id: Nemotron-PII-train-17574, key: cdbd07cf32b07e93}
+    - {id: Nemotron-PII-train-59492, key: a76da572067d5326}
+    - {id: Nemotron-PII-train-uid-a1f39f0ee68c4fa392f78e6b31e3dff5, key: b1428fc4b31ed71b}
+    - {id: Nemotron-PII-train-uid-bbefd93db7de471b8c304bb3f1b35363, key: f815f7789624024b}
+    - {id: Nemotron-PII-train-uid-700bb875c32649aca7f2860aa500743c, key: a8a14b54f451b76b}
+    - {id: Nemotron-PII-train-uid-050d2d4fc0c8452bba3e4ad87befdca0, key: 27910447552b106d}
+    - {id: Nemotron-PII-train-uid-cb7d6f7b8eb940f8a0f26007bddfd809, key: 7a0444b352f9feaf}
+    - {id: Nemotron-PII-train-uid-4ba9c4975bc140d4931809e8e18b767a, key: c1c5c3474c79cdae}
+    - {id: Nemotron-PII-train-uid-d8188b445cfb480b9dc26dffeb22bce2, key: 5fac2dafb24bd76f}
+    - {id: Nemotron-PII-train-uid-8be628a1f5cb4fb3acaa66b535f97fa0, key: 0da867205ef18695}
+  reference_documents: 387391
+  reference_sha256:
+    base_public_train.jsonl: a2558d6dbbaec90d96cb23104692151d79cf395cb52ae94893178dac9eecae00
+    openpii1m_xl.jsonl: 14ded74660e7e43692dd80ac8113ca2eef1542333026b60ee75e8ce6e997957c
+    nemotron_xl.jsonl: 090d08dd2395b921c9ad25b91f2d9f7ce10cfe8acf3f1236ed26d6b4a366eae3
+    gretel_en_v1_xl.jsonl: 966274b15717093c76d91493924475959171c4a3e466fb06fbb7bd33b054bebf
+    gretel_finance_xl.jsonl: e4b9711baacc74f013a72e63dcff1977e6eec580665ed6194a073dc3b9afb731
+entries:
+  - id: openpii-1m-train-file
+    type: url
+    url: https://huggingface.co/datasets/ai4privacy/pii-masking-openpii-1m/resolve/ecfdc547f4a0955600cfe6ab98ba2a162207fcc0/data/train.jsonl
+    pin: {sha256: f167e4290bc8dc9d92866e1e7be57821e3847f0dc4b02140a9a5540fb9151743, size: 3690456830}
+    licence: CC-BY-4.0
+    identities: ["hf:ai4privacy/pii-masking-openpii-1m:train"]
+    description: OpenPII-1M TRAIN, 23 languages (the file's rows carry their own `split`; only `train` rows are read).
+    files: [{name: openpii1m_train.jsonl, sha256: f167e4290bc8dc9d92866e1e7be57821e3847f0dc4b02140a9a5540fb9151743, size: 3690456830}]
+  - id: nemotron-pii-train-file
+    type: url
+    url: https://huggingface.co/datasets/nvidia/Nemotron-PII/resolve/b70ffaf5ff39e079776134c5bf4381f00a9fd1ed/data/train-00000-of-00001.parquet
+    pin: {sha256: 9cb1a88c339ab84ddbc35ccdde4f6bb713300f5585881f9e02b8db1e0dfdbece, size: 156334329}
+    licence: CC-BY-4.0
+    identities: ["hf:nvidia/Nemotron-PII:train"]
+    description: Nemotron-PII TRAIN, 100,000 English documents.
+    files: [{name: nemotron_train.parquet, sha256: 9cb1a88c339ab84ddbc35ccdde4f6bb713300f5585881f9e02b8db1e0dfdbece, size: 156334329}]
+  - id: gretel-pii-masking-en-v1-train-file
+    type: url
+    url: https://huggingface.co/datasets/gretelai/gretel-pii-masking-en-v1/resolve/e06eb1499ca8d54470f085021cd8e54f9efac7fd/data/train-00000-of-00001.parquet
+    pin: {sha256: 93169003eaa23d0499dbbe26794514216af22bc1bbee71b7b1e1f23edca5ce79, size: 20313313}
+    licence: Apache-2.0
+    identities: ["hf:gretelai/gretel-pii-masking-en-v1:train"]
+    description: Gretel PII masking EN v1 TRAIN, 50,000 English documents.
+    files: [{name: gretel_en_v1_train.parquet, sha256: 93169003eaa23d0499dbbe26794514216af22bc1bbee71b7b1e1f23edca5ce79, size: 20313313}]
+  - id: gretel-finance-multilingual-train-file
+    type: url
+    url: https://huggingface.co/datasets/gretelai/synthetic_pii_finance_multilingual/resolve/7b844d16738527a04264f50214cb426a4cea0897/data/train-00000-of-00001.parquet
+    pin: {sha256: 89bfe27e37e50098347f47f974e5e43f64a521f38171b618600ea7aa9b4fa430, size: 48377012}
+    licence: Apache-2.0
+    identities: ["hf:gretelai/synthetic_pii_finance_multilingual:train"]
+    description: Gretel synthetic PII finance TRAIN, 50,346 documents in 7 languages.
+    files: [{name: gretel_finance_train.parquet, sha256: 89bfe27e37e50098347f47f974e5e43f64a521f38171b618600ea7aa9b4fa430, size: 48377012}]

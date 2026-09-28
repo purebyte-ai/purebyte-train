@@ -1,0 +1,76 @@
+# False-alarm exams for the text model: public repositories that hold no real credential, so every finding on them is a
+# false alarm. They are ONLY scanned and counted, never read to design training data, and nothing from them may reach a
+# training corpus (identity check on the repository URL, content check on 64-byte blocks).
+#
+#   python data/fetch_exams.py --set code-fp-a      -> $PUREBYTE_DATA/exams/code-fp-a/<repo>/...   (exact committed bytes)
+#   python data/fingerprint_exams.py --set code-fp-a -> $PUREBYTE_DATA/exams/fingerprints/code-fp-a.npz
+#
+# Every file of every repository at the pinned commit is fingerprinted (any size, any type).
+schema: 1
+kind: exam
+name: code-fp
+description: Repositories without credentials, scanned to count false alarms of the text model.
+sets:
+  - name: code-fp-a
+    role: test
+    description: Six web frameworks and HTTP libraries (Python, Go, JavaScript, Ruby, Java).
+    entries:
+      - {id: urllib3, type: git, url: https://github.com/urllib3/urllib3, pin: {commit: 09217b75d51f3c74d089b587f1be813b6bdfc7d7}, licence: MIT}
+      - {id: chi, type: git, url: https://github.com/go-chi/chi, pin: {commit: 3d1777a1ef8881f7d1da0b02c76ca8f0a29cd2bc}, licence: MIT}
+      - {id: fastify, type: git, url: https://github.com/fastify/fastify, pin: {commit: 630acd0b6cf8a91322ff05c3d95feb991091866d}, licence: MIT}
+      - {id: puma, type: git, url: https://github.com/puma/puma, pin: {commit: 306daddfd07fdf0ca902eb7ea89ceb7dd6139050}, licence: BSD-3-Clause}
+      - {id: gs-rest-service, type: git, url: https://github.com/spring-guides/gs-rest-service, pin: {commit: 3f4cef01152596c19bc4d37939409358812b1421}, licence: Apache-2.0}
+      - {id: tornado, type: git, url: https://github.com/tornadoweb/tornado, pin: {commit: 85b6917d05a84a6d26b7488b2b56d0b52c107a0f}, licence: Apache-2.0}
+
+  - name: code-fp-b
+    role: test
+    description: Eighteen HTTP clients, web frameworks and libraries in eight languages.
+    entries:
+      - {id: click, type: git, url: https://github.com/pallets/click, pin: {commit: 6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1}, licence: BSD-3-Clause}
+      - {id: starlette, type: git, url: https://github.com/encode/starlette, pin: {commit: 57de5fa9c2a98089a78d32d560e9b23e62560d5f}, licence: BSD-3-Clause}
+      - {id: aiohttp, type: git, url: https://github.com/aio-libs/aiohttp, pin: {commit: 3497f81087cc8dee900f22cc4c431ccba6aff419}, licence: Apache-2.0}
+      - {id: mux, type: git, url: https://github.com/gorilla/mux, pin: {commit: db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265}, licence: BSD-3-Clause}
+      - {id: cobra, type: git, url: https://github.com/spf13/cobra, pin: {commit: adbc8813901bba65827259daa8e22ff94ec1f30e}, licence: Apache-2.0}
+      - {id: go-redis, type: git, url: https://github.com/redis/go-redis, pin: {commit: 7f3b3dffde59329db9fa7a71d650ef373affb599}, licence: BSD-2-Clause}
+      - {id: axios, type: git, url: https://github.com/axios/axios, pin: {commit: 56a5f1acdc41965f464eb59bec6cc828113ba546}, licence: MIT}
+      - {id: got, type: git, url: https://github.com/sindresorhus/got, pin: {commit: d7ca12065f09776ff70719758f7b090fafb174d9}, licence: MIT}
+      - {id: hapi, type: git, url: https://github.com/hapijs/hapi, pin: {commit: b90c41b9006143421dc715c01d86e6f4933af1e4}, licence: BSD-3-Clause}
+      - {id: devise, type: git, url: https://github.com/heartcombo/devise, pin: {commit: 372b295fe6f63b4af3269f5dcd51a18c0bc2016c}, licence: MIT}
+      - {id: sidekiq, type: git, url: https://github.com/sidekiq/sidekiq, pin: {commit: e8c3fe311cf93f56e504c369c40df9db4436b6e5}, licence: LGPL-3.0-only}
+      - {id: okhttp, type: git, url: https://github.com/square/okhttp, pin: {commit: 40a3b8749deaacf60a04c890aed052cb14ad36ee}, licence: Apache-2.0}
+      - {id: gson, type: git, url: https://github.com/google/gson, pin: {commit: 854c8255b625cf1e13c701a83ea9ccb4caaa576a}, licence: Apache-2.0}
+      - {id: slim, type: git, url: https://github.com/slimphp/Slim, pin: {commit: 3675bf6baac66b07032575b7bef4200b60b7974b}, licence: MIT}
+      - {id: guzzle, type: git, url: https://github.com/guzzle/guzzle, pin: {commit: 93939470950a9b11e2e84204166ef5e048c55fe4}, licence: MIT}
+      - {id: reqwest, type: git, url: https://github.com/seanmonstar/reqwest, pin: {commit: a7abe639aed1949259739121067f89f315b629a5}, licence: MIT OR Apache-2.0}
+      - {id: axum, type: git, url: https://github.com/tokio-rs/axum, pin: {commit: 3ea7f31b8e43962053d5e45a8cea87097adb9ca0}, licence: MIT}
+      - {id: restsharp, type: git, url: https://github.com/restsharp/RestSharp, pin: {commit: 64ee12995b8d7409a5863da7b71cddfa526ffb7a}, licence: Apache-2.0}
+
+  - name: code-fp-c
+    role: test
+    description: Twelve repositories in languages and formats absent from the two sets above (Swift, Kotlin/Android,
+      Ansible, Docker Compose, Helm, Nix, Terraform, Elixir, nginx configuration, shell dotfiles, Jupyter).
+    entries:
+      - {id: alamofire, type: git, url: https://github.com/Alamofire/Alamofire, pin: {commit: bda9ed57d72988a3a2ada33d824583541f86eac6}, licence: MIT}
+      - {id: ansible-for-devops, type: git, url: https://github.com/geerlingguy/ansible-for-devops, pin: {commit: 86e1bf80098239cd995d54217585e8d61117d2e7}, licence: MIT}
+      - {id: architecture-samples, type: git, url: https://github.com/android/architecture-samples, pin: {commit: ee66e1526b84c026615df032c705842b7d2a521f}, licence: Apache-2.0}
+      - {id: awesome-compose, type: git, url: https://github.com/docker/awesome-compose, pin: {commit: 30f4b7f6a6c3b0c0ecf4d4efb0de203c48d11562}, licence: CC0-1.0}
+      - {id: dotfiles, type: git, url: https://github.com/mathiasbynens/dotfiles, pin: {commit: b7c7894e7bb2de5d60bfb9a2f5e46d01a61300ea}, licence: MIT}
+      - {id: helm-charts, type: git, url: https://github.com/prometheus-community/helm-charts, pin: {commit: 6e181ddf380b0981072791dcf002d601871ec3d2}, licence: Apache-2.0}
+      - {id: home-manager, type: git, url: https://github.com/nix-community/home-manager, pin: {commit: cbcbfa2778e0c5653ef349df3ebae8288efac3c0}, licence: MIT}
+      - {id: koin, type: git, url: https://github.com/InsertKoinIO/koin, pin: {commit: dc86ef8dd8fbe8564fb7453c03f5b738da3450bb}, licence: Apache-2.0}
+      - {id: nginx, type: git, url: https://github.com/nginx/nginx, pin: {commit: ef0aa967dce9d30b824d4c839d3579d2a17e0666}, licence: BSD-2-Clause}
+      - {id: phoenix, type: git, url: https://github.com/phoenixframework/phoenix, pin: {commit: da518c2f871c3b9049929160c91de87a323b61be}, licence: MIT}
+      - {id: terraform-aws-eks, type: git, url: https://github.com/terraform-aws-modules/terraform-aws-eks, pin: {commit: fe511041143d59b663c0b8e0be9e50423c505cd3}, licence: Apache-2.0}
+      - {id: whirlwind-tour-of-python, type: git, url: https://github.com/jakevdp/WhirlwindTourOfPython, pin: {commit: 6f1daf714fe52a8dde6a288674ba46a7feed8816}, licence: CC0-1.0}
+
+  - name: code-fp-dev
+    role: dev
+    description: Six repositories whose findings may be inspected while developing data generators (a development set,
+      so it is not a clean measure of generalisation; the three sets above are).
+    entries:
+      - {id: httpx, type: git, url: https://github.com/encode/httpx, pin: {commit: b5addb64f0161ff6bfe94c124ef76f6a1fba5254}, licence: BSD-3-Clause}
+      - {id: bottle, type: git, url: https://github.com/bottlepy/bottle, pin: {commit: cbd569c447b3fd53f194cef9a306146ce6a07a59}, licence: MIT}
+      - {id: echo, type: git, url: https://github.com/labstack/echo, pin: {commit: 9ce228d5b232644c40d03d40cc3e0c2df0b764a1}, licence: MIT}
+      - {id: koa, type: git, url: https://github.com/koajs/koa, pin: {commit: 824c1cf8de9a91a2941973b25dc8a3d3029b9e4f}, licence: MIT}
+      - {id: rack, type: git, url: https://github.com/rack/rack, pin: {commit: a9833c8f3bd6b6d1e0ab35de00a1f1a16b5095f5}, licence: MIT}
+      - {id: jhipster-sample-app, type: git, url: https://github.com/jhipster/jhipster-sample-app, pin: {commit: 6b000b5d23a36c45e01472471b84a44fa2464044}, licence: Apache-2.0}

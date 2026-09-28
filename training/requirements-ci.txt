@@ -1,0 +1,10 @@
+# The training stack in CI (.github/workflows/ci.yml, jobs `training` and `training-os`): CPU wheels only, pinned to the
+# library versions the golden files were recorded with (training/tests/golden/*.json, `meta`), which were recorded on
+# Windows x86-64 with Python 3.10 and match only there: CI skips them (PBTRAIN_GOLDEN_SKIP). Also for a local CPU run on
+# Linux or Windows (on macOS write torch==2.4.1: its wheels carry no +cpu label): pip install -r training/requirements-ci.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1+cpu
+numpy==2.2.1
+pyyaml==6.0.3
+scikit-learn==1.7.2
+pytest==9.0.2

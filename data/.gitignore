@@ -1,0 +1,10 @@
+# Nothing downloaded or built is ever committed: it lives under $PUREBYTE_DATA (default ~/.purebyte/data).
+__pycache__/
+.pytest_cache/
+*.bin
+*.npz
+*.jsonl
+*.tsv
+*.whl
+*.deb
+*.zip

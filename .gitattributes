@@ -1,0 +1,5 @@
+# Text files are stored and checked out with LF line endings on every platform: the shebang lines of the data scripts
+# break with CRLF on Linux and macOS, manifests and recipes are recorded by the SHA-256 of their bytes, and CI compares
+# the pinned copies in reference/ and benchmarks/ with the runtime's byte for byte.
+* text=auto eol=lf
+*.gguf binary

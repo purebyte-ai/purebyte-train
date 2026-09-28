@@ -1,0 +1,10 @@
+__pycache__/
+*.egg-info/
+build/
+.pytest_cache/
+# never commit data, runs or weights (they live in $PUREBYTE_DATA / $PUREBYTE_WORK)
+*.gguf
+*.pt
+*.npz
+*.bin
+!tests/golden/*.json
